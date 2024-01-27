@@ -1,0 +1,275 @@
+from datetime import datetime, timedelta
+
+import pandas as pd
+from gcsa.google_calendar import GoogleCalendar
+
+from helper import Helper as helper
+
+
+class Analyzer:
+    def __init__(self):
+        self.adhoc = GoogleCalendar('***REMOVED***')
+        self.wasted = {'Trading': 2, 'TV Show': 0, 'Social Media': 0.5, 'Messaging': 1, 'Casual Creative': 0.5,
+                  'Podcast': 1.5, 'Reflecting': 0.75, 'Private': 0.5, 'Music': 0.5, 'Sports': 1, 'Playing':0,
+                  'People': 3.5, 'Exploring': 2, 'Chilling': 1.5, 'Movie': 0, 'Calling': 1, 'Dating': 0,
+                  'YouTube': 0.5, 'News': 1, 'Under Influence': 1, 'Gaming': 0, 'Surfing Casually': 0} 
+        self.neutral = ['Washroom', 'Transportation', 'Unavoidable Intermission', 'Driving', 'Financial', 'Getting Ready',
+                   'Thinking', 'Deciding', 'Intermission', 'Location', 'Listening',
+                   'Hygiene', 'Report', 'Helping Parents', 'Errands', 'Spiritual', 'Technicalities', 'Maintaining',
+                   'Medical', 'Eating', 'Tracking', 'School', 'Food Prep/Clean/Order', 'Showering', 'Organizing',
+                   'Unavoidable Family Matters', 'Sleep', 'Shopping', 'Biking', 'Under Influence']
+        self.productive = ['Analyzing', 'Project', 'Designing', 'General Learning', 'Yoga', 'Meditating', 'Working Out',
+                      'Planning', 'Contemplating', 'Skill Learning', 'Studying/Homework', 'Problem Solving', 'Wycik',
+                      'Event', 'Business', 'Book', 'Crypto', 'Helping/Giving', 'Meeting', 'Researching', 'Selling',
+                      'Practical', 'Concentrating', 'Skill Practicing', 'Formal Learning', 'Recalling', 'Mentoring',
+                      'Formal Working', 'Emailing']
+    def max_mindful_slow(self, data):
+        mindful_whitelist = ['Sleep', 'Concentration', 'Under Influence']
+        slow_whitelist = ['Concentration', 'Crypto', 'Deciding', 'Formal Learning', 'Gaming',
+                          'General Learning', "Contemplating", 'Meditating', 'Movie', 'Music', 'News', 'Podcast',
+                          'Reflecting', 'Researching', 'Skill Learning', 'Social Media', 'Sleep', 'Sports',
+                          'Thinking', 'Transportation', 'TV Show', 'Under Influence', 'Recalling', 'YouTube']
+
+        week_summary = data[['Project', 'SecDuration']].groupby(by='Project').sum()
+
+        max_mindful = 0
+        max_slow = 0
+
+        dftag = data[['Project', 'SecDuration', 'Tags']].set_index('Tags')
+        dfslow = dftag[dftag.index.str.contains('Exclude Slow')].groupby("Project").sum()
+
+        # Calculating total possible mindful seconds
+        for project, seconds in zip(week_summary.index, week_summary['SecDuration'].values):
+            if project not in mindful_whitelist:
+                max_mindful += seconds
+
+        # Calculating total possible slow seconds
+        for project, seconds in zip(week_summary.index, week_summary['SecDuration'].values):
+            if project not in slow_whitelist:
+                max_slow += seconds
+            if project in dfslow.index:
+                excluded_seconds = dfslow.loc[project, "SecDuration"]
+                max_slow -= excluded_seconds
+
+        return round(max_mindful / 3600, 2), round(max_slow / 3600, 2)
+    
+    def get_all_current_events(self, cal_dic):
+        date_before = datetime.now().astimezone()
+        date_after = datetime.now().astimezone() + timedelta(minutes=0.5)
+        all_events = []
+        
+        for name, calendar in cal_dic.items():
+            events = list(calendar.get_events(date_before, date_after, single_events=True))
+            if events != []:
+                events += [name]
+                all_events += [events]
+        return all_events
+
+
+    def calculate_ad_hoc_time(self, start_date, end_date, week=False):
+        # Turn start date and end date into datetime objects
+        start_date = datetime.strptime(start_date, '%Y-%m-%d')
+        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+
+        # Get all events from adhoc calendar
+        all_events = self.adhoc.get_events(start_date, end_date, single_events=True)
+
+        # Initialize total duration and a dictionary for daily totals
+        total_duration = 0
+        daily_totals = {str(start_date + timedelta(days=i))[:10]: 0 for i in range((end_date - start_date).days + 1)}
+
+        # Calculate total time and accumulate daily totals
+        for event in all_events:
+            # print(event)
+            duration = event.end - event.start
+            total_duration += duration.total_seconds()
+
+            # Accumulate daily total for the event's start day
+            event_day = str(event.start.date())[:10]
+            # print(event_day)
+            if event_day in daily_totals:
+                daily_totals[event_day] += duration.total_seconds()
+
+        # If week=True, return the daily totals as a list
+        if week:
+          return {date: round(daily_totals[date]/3600, 3) for date in sorted(daily_totals.keys())}
+
+        # Otherwise, return the total duration for the period
+        return round(total_duration/3600, 3)
+
+    
+    def slow_mindful_scores(self, data):
+        actual_mindful_hours = helper.sum_tags_hours(data, 'Mindfulness')
+        actual_slow_hours = helper.sum_tags_hours(data, 'Slowness')
+        actual_mindful_percentage = round(actual_mindful_hours / self.max_mindful_slow(data)[0], 5)
+        actual_slow_percentage = round(actual_slow_hours / self.max_mindful_slow(data)[1], 5)
+
+        start_date, end_date = data['Start date'][0], data['End date'][len(data)-2]
+
+        string = f"""From {start_date} to {end_date}
+Mindful Percentage: {actual_mindful_percentage * 100 }%
+Slow Percentage:    {actual_slow_percentage * 100 }%
+max hours to be mindful: {self.max_mindful_slow(data)[0]}
+max hours to be slow   : {self.max_mindful_slow(data)[1]}
+actual mindful (hours) : {round(actual_mindful_hours, 3)}
+actual slow (hours)    : {round(actual_slow_hours, 3)}
+        """
+        return actual_mindful_percentage, actual_slow_percentage, string
+
+    @staticmethod
+    def get_week_summary(data):
+        data = data[['Project', 'SecDuration']].groupby(by='Project').sum()
+        data['Duration'] = helper.seconds_to_clock(data['SecDuration'])
+        return data.sort_values(by='SecDuration', ascending=False).drop("SecDuration", axis=1)
+    
+    def dprint(self, *args):
+        if self.debug:
+            print(*args)
+
+    def group_df(self, time_df):
+    # Create a DataFrame
+        df = pd.DataFrame(time_df, columns=['Id',"Start date", 'Project', 'Description', 'SecDuration'])
+
+        # Add a column to track the group of consecutive projects
+        df['Group'] = (df['Project'] != df['Project'].shift()).cumsum()
+
+        # Group by the 'Group' column, and aggregate the 'SecDuration' using sum()
+        # Also, take the first value of 'Project' for each group
+        grouped = df.groupby('Group').agg({"Start date": "first",'Project': 'first', 'SecDuration': 'sum'})
+
+        # Update the 'Description' based on whether the group contains more than one row
+        grouped['Description'] = grouped.apply(lambda row: 'General' if len(df[df['Group'] == row.name]) > 1 else df[df['Group'] == row.name].iloc[0]['Description'], axis=1)
+
+        # Reset the index
+        grouped.reset_index(drop=True, inplace=True)
+        grouped = grouped[["Start date", 'Project', 'Description', 'SecDuration']]
+        return grouped
+    
+    def calculate_1HUT(self, time_df, week=False):
+        # display(Markdown("## p1HUT: Productive >1H Uninterrupted Time"))
+        flow_threshold=50
+        daily_totals = {}
+        p1HUT_dict, n1HUT_dict, nw1HUT_dict, w1HUT_dict = {}, {}, {}, {}
+
+        productive = self.productive
+        wasted = self.wasted
+        neutral = self.neutral
+
+        time_df = self.group_df(time_df)
+        for index in time_df.index:
+            task_seconds = int(time_df.loc[index, "SecDuration"])
+            project = time_df.loc[index, 'Project']
+            task_date = time_df.at[index, 'Start date']  # Assuming 'Date' column exists
+            
+            if task_date not in daily_totals:
+              daily_totals[task_date] = {'productive': 0, 'neutral': 0, 'non_wasted': 0, 'wasted': 0}
+            
+            neg_dic = ["Sleep"]
+            if task_seconds > 60 * flow_threshold and project not in neg_dic:
+                if project in productive:
+                    daily_totals[task_date]['productive'] += task_seconds
+                elif project in neutral:
+                    daily_totals[task_date]['neutral'] += task_seconds
+                elif project in wasted:
+                    if task_seconds/3600 < wasted[project] and task_seconds/3600 > flow_threshold/60: 
+                        daily_totals[task_date]['non_wasted'] += task_seconds
+                    if task_seconds/3600 > wasted[project]:
+                        daily_totals[task_date]['non_wasted'] += task_seconds
+                    if (task_seconds/3600-wasted[project]) > flow_threshold/60:
+                        daily_totals[task_date]['wasted'] += task_seconds
+        if week:
+            for date in sorted(daily_totals.keys()):
+                day_data = daily_totals[date]
+                p1HUT_dict[date] = round(day_data['productive'] / 3600, 3)
+                n1HUT_dict[date] = round(day_data['neutral'] / 3600, 3)
+                nw1HUT_dict[date] = round(day_data['non_wasted'] / 3600, 3)
+                w1HUT_dict[date] = round(day_data['wasted'] / 3600, 3)
+
+            return {
+                "p1HUT": p1HUT_dict,
+                "n1HUT": n1HUT_dict,
+                "nw1HUT": nw1HUT_dict,
+                "w1HUT": w1HUT_dict
+            }
+                        
+        else:
+          # Calculate total duration for each category across the entire date range
+          total_productive = sum(daily_totals[date]['productive'] for date in daily_totals)
+          total_neutral = sum(daily_totals[date]['neutral'] for date in daily_totals)
+          total_non_wasted = sum(daily_totals[date]['non_wasted'] for date in daily_totals)
+          total_wasted = sum(daily_totals[date]['wasted'] for date in daily_totals)
+
+          # Convert to hours and round
+          p1HUT = round(total_productive / 3600, 3)
+          n1HUT = round(total_neutral / 3600, 3)
+          nw1HUT = round(total_non_wasted / 3600, 3)
+          w1HUT = round(total_wasted / 3600, 3)
+
+          # Count the number of days in which each category occurred
+          Np1HUT = sum(1 for date in daily_totals if daily_totals[date]['productive'] > 0)
+          Nn1HUT = sum(1 for date in daily_totals if daily_totals[date]['neutral'] > 0)
+          Nnw1HUT = sum(1 for date in daily_totals if daily_totals[date]['non_wasted'] > 0)
+          Nw1HUT = sum(1 for date in daily_totals if daily_totals[date]['wasted'] > 0)
+
+          # Return the total duration for each category
+          return {
+              "p1HUT": p1HUT, "Np1HUT": Np1HUT, 
+              "n1HUT": n1HUT, "Nn1HUT": Nn1HUT, 
+              "nw1HUT": nw1HUT, "Nnw1HUT": Nnw1HUT, 
+              "w1HUT": w1HUT, "Nw1HUT": Nw1HUT
+          }
+        
+    def efficiency(self, loader, data, debug=False, week=False):
+        self.debug = debug
+        productive = self.productive
+        wasted = self.wasted
+        neutral = self.neutral
+
+        data['TagProductive'] = data['Tags'].str.contains('Productive')
+        data['TagUnavoidable'] = data['Tags'].str.contains('Unavoidable')
+
+        grouped_data = data.groupby(['Start date', 'Project', 'TagProductive', 'TagUnavoidable']).sum().reset_index()
+
+        # Initializing total and daily metrics
+        daily_metrics = {'hours_free': {}, 'efficiency':{}, 'inefficiency':{}, 'productive': {}, 'neutral': {}, 'wasted': {}, 'non_wasted': {}}
+
+        # Processing each day and project
+        for date, group in grouped_data.groupby('Start date'):
+            day_totals = {key: 0 for key in daily_metrics.keys()}
+
+            for _, row in group.iterrows():
+                project, seconds = row['Project'], row['SecDuration']
+                tag_productive, tag_unavoidable = row['TagProductive'], row['TagUnavoidable']
+                day_totals['hours_free'] += seconds
+
+                if project in neutral:
+                    day_totals['hours_free'] -= seconds
+                    day_totals['neutral'] += seconds
+                elif project in productive:
+                    day_totals['productive'] += seconds
+                elif project in wasted.keys():
+                    wasted_seconds = seconds #3600
+                    if tag_productive:
+                        productive_seconds = seconds
+                        wasted_seconds -= productive_seconds 
+                        day_totals['productive'] += productive_seconds
+                    elif tag_unavoidable:
+                        neutral_seconds = seconds
+                        wasted_seconds -= neutral_seconds
+                        day_totals['neutral'] += neutral_seconds
+                    non_wasted_seconds = min(wasted_seconds, wasted[project] * 3600)
+                    day_totals['non_wasted'] += non_wasted_seconds
+                    day_totals['wasted'] += (wasted_seconds - non_wasted_seconds)
+
+            for metric, value in day_totals.items():
+                daily_metrics[metric][str(date)[:10]] = round(value / 3600, 3)
+
+        # Calculating hours free and efficiency for each day and adding to daily_metrics
+        for date in daily_metrics['hours_free']:
+            daily_metrics['efficiency'][date] = round(daily_metrics['productive'][date]/daily_metrics['hours_free'][date],4)
+            daily_metrics['inefficiency'][date] = round(daily_metrics['wasted'][date]/daily_metrics['hours_free'][date],4)
+
+        if week:
+            return daily_metrics
+        else:
+            return {metric: sum(daily_metrics[metric].values()) for metric in daily_metrics}
