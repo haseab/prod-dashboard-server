@@ -44,6 +44,7 @@ def metrics():
     command_df = df[df['Keyboard Shortcut'] == "Command + `"]
     daily_counts = command_df.resample('D').count()
     daily_counts.index = daily_counts.index.strftime('%Y-%m-%d')
+    daily_counts = (daily_counts/2).astype(int)
     daily_counts_dict = daily_counts.to_dict()['Keyboard Shortcut']
     
     return_object = {
