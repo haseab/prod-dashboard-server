@@ -26,6 +26,7 @@ def metrics():
     now = datetime.now()
     
     start_datetime, end_datetime= now-timedelta(days=now.weekday()), now
+    start_datetime = start_datetime.replace(hour=0, minute=0, second=0, microsecond=0)
     start_date, end_date= str(start_datetime)[:10], str(end_datetime)[:10]
     time_df = l.fetch_data(start_date, end_date)
     now_df = l.get_toggl_current_task()
@@ -34,7 +35,7 @@ def metrics():
     p1HUT, n1HUT, nw1HUT, w1HUT = a.calculate_1HUT(master_df, week=True).values()
     hours_free, efficiency, inefficiency, productive, neutral, wasted, non_wasted = a.efficiency(l, master_df, week=True).values()
     oneHUT = {date: n1HUT.get(date, 0) + nw1HUT.get(date, 0) + p1HUT.get(date, 0) + w1HUT.get(date, 0) for date in n1HUT}
-    
+
     # Getting Distraction Data
     df = pd.read_csv("/Users/haseab/Desktop/Desktop/backed-up/backed-scripts/Python/TiBA/src/keyboard_shortcut_launches.csv")
     df['Time'] = pd.to_datetime(df['Time'], errors='coerce')
