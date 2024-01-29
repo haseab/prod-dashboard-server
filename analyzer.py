@@ -216,7 +216,7 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
               "p1HUT": p1HUT, "Np1HUT": Np1HUT, 
               "n1HUT": n1HUT, "Nn1HUT": Nn1HUT, 
               "nw1HUT": nw1HUT, "Nnw1HUT": Nnw1HUT, 
-              "w1HUT": w1HUT, "Nw1HUT": Nw1HUT
+              "w1HUT": w1HUT, "Nw1HUT": Nw1HUT,
           }
         
     def efficiency(self, loader, data, debug=False, week=False):
