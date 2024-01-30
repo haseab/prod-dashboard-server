@@ -111,7 +111,7 @@ class DataLoader:
 
         if "Description" not in columns: 
             data['Description'] = ""
-        columns.append("Description")
+            columns.append("Description")
     
         if "pid" not in columns: 
             data['pid'] = ""
