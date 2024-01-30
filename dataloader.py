@@ -109,6 +109,14 @@ class DataLoader:
 
         columns = [column[0].upper() + column[1:] for column in data.keys()]
 
+        if "Description" not in columns: 
+            data['Description'] = ""
+        columns.append("Description")
+    
+        if "pid" not in columns: 
+            data['pid'] = ""
+            columns.append("pid")
+
         df2 = pd.DataFrame([data.values()], columns=columns)
 
         df2['Start'] = pd.to_datetime(df2['Start'], utc=True)
