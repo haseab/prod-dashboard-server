@@ -68,8 +68,8 @@ class Analyzer:
 
     def calculate_ad_hoc_time(self, start_date, end_date, week=False):
         # Turn start date and end date into datetime objects
-        start_date = datetime.strptime(start_date, '%Y-%m-%d')
-        end_date = datetime.strptime(end_date, '%Y-%m-%d')
+        start_date = datetime.strptime(start_date, '%Y-%m-%d').replace(hour=0, minute=0, second=0)
+        end_date = datetime.strptime(end_date, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
 
         # Get all events from adhoc calendar
         all_events = self.adhoc.get_events(start_date, end_date, single_events=True)
