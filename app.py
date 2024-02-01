@@ -33,7 +33,7 @@ def metrics():
     
     master_df = pd.concat([time_df,now_df]).reset_index(drop=True)
     flow_df = a.group_df(master_df)
-    flow = flow_df.iloc[-1]['SecDuration']/3600 > 0.8
+    flow = round(flow_df.iloc[-1]['SecDuration']/3600,3)
     adhoc_time = a.calculate_ad_hoc_time(start_date, end_date, week=True)
     p1HUT, n1HUT, nw1HUT, w1HUT = a.calculate_1HUT(master_df, week=True).values()
     hours_free, efficiency, inefficiency, productive, neutral, wasted, non_wasted = a.efficiency(l, master_df, week=True).values()
@@ -62,7 +62,7 @@ def metrics():
         "productiveList": productive,
         "distractionCountList": daily_counts_dict,
         "inefficiencyList": inefficiency,
-        "flow": bool(flow)
+        "flow": flow
     };
 
     pretty_json = json.dumps(return_object, indent=4)
