@@ -12,6 +12,8 @@ import json
 app = Flask(__name__)
 CORS(app)
 
+historical_view = False
+
 @app.route('/')
 def hello_world():
     return 'Hello, World!'
@@ -24,16 +26,24 @@ def metrics():
     l = DataLoader()
     a = Analyzer()
     now = datetime.now()
-    
-    start_datetime, end_datetime= now-timedelta(days=now.weekday()), now
+
+    if historical_view:
+        now_df = pd.DataFrame(columns=['Id', 'Project', 'Description', 'Start date', 'Start time', 'End date', 'End time', 'Tags', 'SecDuration'])
+        start_date, end_date = "2024-01-29", "2024-02-04"
+        start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
+        end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
+    else: 
+        now_df = l.get_toggl_current_task()
+        start_datetime, end_datetime= now-timedelta(days=now.weekday()), now
+
+
     start_datetime = start_datetime.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_datetime = end_datetime.replace(hour=23, minute=59, second=59, microsecond=0)
     start_date, end_date= str(start_datetime)[:10], str(end_datetime)[:10]
     time_df = l.fetch_data(start_date, end_date)
-    now_df = l.get_toggl_current_task()
-    
     master_df = pd.concat([time_df,now_df]).reset_index(drop=True)
     flow_df = a.group_df(master_df)
-    flow = round(flow_df.iloc[-1]['SecDuration']/3600,3)
+    flow = round(flow_df.iloc[-1]['SecDuration']/3600,3) if not historical_view else 0
     adhoc_time = a.calculate_ad_hoc_time(start_date, end_date, week=True)
     p1HUT, n1HUT, nw1HUT, w1HUT = a.calculate_1HUT(master_df, week=True).values()
     hours_free, efficiency, inefficiency, productive, neutral, wasted, non_wasted = a.efficiency(l, master_df, week=True).values()
