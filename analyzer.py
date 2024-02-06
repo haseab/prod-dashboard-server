@@ -8,7 +8,7 @@ from helper import Helper as helper
 
 class Analyzer:
     def __init__(self):
-        self.adhoc = GoogleCalendar('***REMOVED***')
+        self.unplanned = GoogleCalendar('***REMOVED***')
         self.wasted = {'Trading': 2, 'TV Show': 0, 'Social Media': 0.5, 'Messaging': 1, 'Casual Creative': 0.5,
                   'Podcast': 1.5, 'Reflecting': 0.75, 'Private': 0.5, 'Music': 0.5, 'Sports': 1, 'Playing':0,
                   'People': 3.5, 'Exploring': 2, 'Chilling': 1.5, 'Movie': 0, 'Calling': 1, 'Dating': 0,
@@ -66,13 +66,13 @@ class Analyzer:
         return all_events
 
 
-    def calculate_ad_hoc_time(self, start_date, end_date, week=False):
+    def calculate_unplanned_time(self, start_date, end_date, week=False):
         # Turn start date and end date into datetime objects
         start_date = datetime.strptime(start_date, '%Y-%m-%d').replace(hour=0, minute=0, second=0)
         end_date = datetime.strptime(end_date, '%Y-%m-%d').replace(hour=23, minute=59, second=59)
 
-        # Get all events from adhoc calendar
-        all_events = self.adhoc.get_events(start_date, end_date, single_events=True)
+        # Get all events from unplanned calendar
+        all_events = self.unplanned.get_events(start_date, end_date, single_events=True)
 
         # Initialize total duration and a dictionary for daily totals
         total_duration = 0

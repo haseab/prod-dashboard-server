@@ -44,7 +44,7 @@ def metrics():
     master_df = pd.concat([time_df,now_df]).reset_index(drop=True)
     flow_df = a.group_df(master_df)
     flow = round(flow_df.iloc[-1]['SecDuration']/3600,3) if not historical_view else 0
-    adhoc_time = a.calculate_ad_hoc_time(start_date, end_date, week=True)
+    unplanned_time = a.calculate_unplanned_time(start_date, end_date, week=True)
     p1HUT, n1HUT, nw1HUT, w1HUT = a.calculate_1HUT(master_df, week=True).values()
     hours_free, efficiency, inefficiency, productive, neutral, wasted, non_wasted = a.efficiency(l, master_df, week=True).values()
     oneHUT = {date: n1HUT.get(date, 0) + nw1HUT.get(date, 0) + p1HUT.get(date, 0) + w1HUT.get(date, 0) for date in n1HUT}
@@ -61,7 +61,7 @@ def metrics():
     daily_counts_dict = daily_counts.to_dict()['Keyboard Shortcut']
     
     return_object = {
-        "adhocTimeList": adhoc_time,
+        "unplannedTimeList": unplanned_time,
         "oneHUTList": oneHUT,
         "p1HUTList": p1HUT,
         "n1HUTList": n1HUT,
