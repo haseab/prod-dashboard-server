@@ -12,7 +12,7 @@ import json
 app = Flask(__name__)
 CORS(app)
 
-historical_view = False
+historical_view = True
 
 @app.route('/')
 def hello_world():
