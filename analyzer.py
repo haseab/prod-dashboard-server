@@ -169,17 +169,17 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
             
             neg_dic = ["Sleep"]
             if task_seconds > 60 * flow_threshold and project not in neg_dic:
+                print(task_date, project, time_df.loc[index, "Description"][:10], task_seconds/3600)
                 if project in productive:
                     daily_totals[task_date]['productive'] += task_seconds
                 elif project in neutral:
                     daily_totals[task_date]['neutral'] += task_seconds
                 elif project in wasted:
-                    if task_seconds/3600 < wasted[project] and task_seconds/3600 > flow_threshold/60: 
+                    if task_seconds/3600 < wasted[project]: 
                         daily_totals[task_date]['non_wasted'] += task_seconds
                     if task_seconds/3600 > wasted[project]:
-                        daily_totals[task_date]['non_wasted'] += task_seconds
-                    if (task_seconds/3600-wasted[project]) > flow_threshold/60:
-                        daily_totals[task_date]['wasted'] += task_seconds
+                        daily_totals[task_date]['non_wasted'] += wasted[project]*3600
+                        daily_totals[task_date]['wasted'] += task_seconds - wasted[project]*3600
         if week:
             for date in sorted(daily_totals.keys()):
                 day_data = daily_totals[date]
