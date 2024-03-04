@@ -20,7 +20,7 @@ def hello_world():
 
 @app.route('/metrics')
 def metrics():
-    # response = jsonify({"message": "Data from Python server"})
+    # response = jsonify({"message": "Data from Python serveOr"})
     # response.headers.add("Access-Control-Allow-Origin", "*")
     ## Getting Toggl & Calendar Data
     l = DataLoader()
@@ -29,7 +29,7 @@ def metrics():
 
     if historical_view:
         now_df = pd.DataFrame(columns=['Id', 'Project', 'Description', 'Start date', 'Start time', 'End date', 'End time', 'Tags', 'SecDuration'])
-        start_date, end_date = "2024-02-12", "2024-02-18"
+        start_date, end_date = "2024-02-26", "2024-03-03"
         start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
     else: 
