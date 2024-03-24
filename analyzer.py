@@ -131,7 +131,7 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
         df = pd.DataFrame(time_df, columns=['Id',"Start date", 'Project', 'Description', 'SecDuration'])
 
         # Remove all Time entries that have ["Tracking", "Planning", "Eating", "Getting Ready", "Washroom"] , in the Project column and ALSO are under 100 seconds in SecDuration column
-        df = df[~((df['Project'].isin(["Tracking", "Planning", "Eating", "Getting Ready", "Washroom", "Messaging", "Maintenance"])) & (df['SecDuration'] < 100))]
+        df = df[~((df['Project'].isin(["Tracking", "Planning", "Eating", "Getting Ready", "Washroom", "Messaging", "Calling", "Maintenance", "People", "Relationship", "Analyzing", "Emailing", "Listening", "Organizing", "Thinking", "Food Prep/Clean/Order", "Recalling", "Unavoidable Intermission", "Technicalities"])) & (df['SecDuration'] < 100))]
 
         # Add a column to track the group of consecutive projects
         df['Group'] = (df['Project'] != df['Project'].shift()).cumsum()
