@@ -29,7 +29,7 @@ def metrics():
 
     if historical_view:
         now_df = pd.DataFrame(columns=['Id', 'Project', 'Description', 'Start date', 'Start time', 'End date', 'End time', 'Tags', 'SecDuration'])
-        start_date, end_date = "2024-03-11", "2024-03-17"
+        start_date, end_date = "2024-03-18", "2024-03-24"
         start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
     else: 

@@ -10,9 +10,9 @@ class Analyzer:
     def __init__(self):
         self.unplanned = GoogleCalendar('***REMOVED***')
         self.wasted = {'Trading': 2, 'TV Show': 0, 'Social Media': 0.5, 'Messaging': 1, 'Casual Creative': 0.5,
-                  'Podcast': 1.5, 'Private': 0.5, 'Music': 0.5, 'Sports': 1, 'Playing':0,
+                  'Podcast': 1.5, 'Private': 2.5, 'Music': 0.5, 'Sports': 1, 'Playing':0,
                   'People': 3.5, 'Exploring': 2, 'Chilling': 1.5, 'Movie': 0, 'Calling': 1, 'Dating': 0,
-                  'YouTube': 0.5, 'News': 1, 'Under Influence': 1, 'Gaming': 0, 'Surfing Casually': 0} 
+                  'YouTube': 0.5, 'News': 1, 'Under Influence': 1, 'Gaming': 0, 'Surfing Casually': 0, 'Relationship': 3 } 
         self.neutral = ['Washroom', 'Transportation', 'Unavoidable Intermission', 'Driving', 'Financial', 'Getting Ready',
                    'Thinking', 'Deciding', 'Intermission', 'Location', 'Listening',
                    'Hygiene', 'Report', 'Helping Parents', 'Errands', 'Spiritual', 'Technicalities', 'Maintaining',
@@ -169,7 +169,7 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
             
             neg_dic = ["Sleep"]
             if task_seconds > 60 * flow_threshold and project not in neg_dic:
-                print(task_date, project, time_df.loc[index, "Description"][:10], task_seconds/3600)
+                # print(task_date, project, time_df.loc[index, "Description"][:10], task_seconds/3600)
                 if project in productive:
                     daily_totals[task_date]['productive'] += task_seconds
                 elif project in neutral:
