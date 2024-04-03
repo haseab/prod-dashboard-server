@@ -14,6 +14,15 @@ CORS(app)
 
 historical_view = False
 
+def prev_week(start_date, end_date, times=1):
+    if (times == 0):
+        return start_date, end_date
+    if (times == 1):
+        datetimes = pd.date_range(start_date, end_date).to_pydatetime()
+        return str(datetimes[0]-timedelta(days=7))[:10], str(datetimes[-1] - timedelta(days=7))[:10]
+    start_date, end_date = prev_week(start_date, end_date)
+    return prev_week(start_date, end_date, times-1)
+
 @app.route('/')
 def hello_world():
     return 'Hello, World!'
@@ -29,7 +38,9 @@ def metrics():
 
     if historical_view:
         now_df = pd.DataFrame(columns=['Id', 'Project', 'Description', 'Start date', 'Start time', 'End date', 'End time', 'Tags', 'SecDuration'])
-        start_date, end_date = "2024-03-18", "2024-03-24"
+        start_date, end_date = "2024-03-25", "2024-03-31"
+        start_date, end_date = prev_week(start_date, end_date, times=5)
+        print(start_date, end_date)
         start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
     else: 
@@ -73,7 +84,9 @@ def metrics():
         "productiveList": productive,
         "distractionCountList": daily_counts_dict,
         "inefficiencyList": inefficiency,
-        "flow": flow
+        "flow": flow,
+        "startDate": start_date,
+        "endDate": end_date
     };
 
     pretty_json = json.dumps(return_object, indent=4)

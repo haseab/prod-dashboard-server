@@ -5,7 +5,6 @@ from gcsa.google_calendar import GoogleCalendar
 
 from helper import Helper as helper
 
-
 class Analyzer:
     def __init__(self):
         self.unplanned = GoogleCalendar('***REMOVED***')
@@ -15,12 +14,12 @@ class Analyzer:
                   'YouTube': 0.5, 'News': 1, 'Under Influence': 1, 'Gaming': 0, 'Surfing Casually': 0, 'Relationship': 3 } 
         self.neutral = ['Washroom', 'Transportation', 'Unavoidable Intermission', 'Driving', 'Financial', 'Getting Ready',
                    'Thinking', 'Deciding', 'Intermission', 'Location', 'Listening',
-                   'Hygiene', 'Report', 'Helping Parents', 'Errands', 'Spiritual', 'Technicalities', 'Maintaining',
+                   'Hygiene', 'Helping Parents', 'Errands', 'Spiritual', 'Technicalities', 'Maintaining',
                    'Medical', 'Eating', 'Tracking', 'School', 'Food Prep/Clean/Order', 'Showering', 'Organizing',
                    'Unavoidable Family Matters', 'Sleep', 'Shopping', 'Biking', 'Under Influence']
         self.productive = ['Analyzing','Reflecting', 'Project', 'Designing', 'General Learning', 'Yoga', 'Meditating', 'Working Out',
                       'Planning', 'Contemplating', 'Skill Learning', 'Studying/Homework', 'Problem Solving', 'Wycik',
-                      'Event', 'Business', 'Book', 'Crypto', 'Helping/Giving', 'Meeting', 'Researching', 'Selling',
+                      'Event', 'Business', 'Report', 'Book', 'Crypto', 'Helping/Giving', 'Meeting', 'Researching', 'Selling',
                       'Practical', 'Concentrating', 'Skill Practicing', 'Formal Learning', 'Recalling', 'Mentoring',
                       'Formal Working', 'Emailing']
     def max_mindful_slow(self, data):
@@ -128,7 +127,7 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
 
     def group_df(self, time_df):
     # Create a DataFrame
-        df = pd.DataFrame(time_df, columns=['Id',"Start date", 'Project', 'Description', 'SecDuration'])
+        df = pd.DataFrame(time_df, columns=['Id',"Start date", 'Project', 'Description', 'SecDuration', 'TagProductive', 'TagUnavoidable'])
 
         # Remove all Time entries that have ["Tracking", "Planning", "Eating", "Getting Ready", "Washroom"] , in the Project column and ALSO are under 100 seconds in SecDuration column
         df = df[~((df['Project'].isin(["Tracking", "Planning", "Eating", "Getting Ready", "Washroom", "Messaging", "Calling", "Maintenance", "People", "Relationship", "Analyzing", "Emailing", "Listening", "Organizing", "Thinking", "Food Prep/Clean/Order", "Recalling", "Unavoidable Intermission", "Technicalities"])) & (df['SecDuration'] < 100))]
@@ -138,14 +137,20 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
 
         # Group by the 'Group' column, and aggregate the 'SecDuration' using sum()
         # Also, take the first value of 'Project' for each group
-        grouped = df.groupby('Group').agg({"Start date": "first",'Project': 'first', 'SecDuration': 'sum'})
+        grouped = df.groupby('Group').agg({
+            "Start date": "first",
+            'Project': 'first',
+            'SecDuration': 'sum',
+            'TagProductive': 'any',
+            'TagUnavoidable': 'any'
+        })
 
         # Update the 'Description' based on whether the group contains more than one row
         grouped['Description'] = grouped.apply(lambda row: 'General' if len(df[df['Group'] == row.name]) > 1 else df[df['Group'] == row.name].iloc[0]['Description'], axis=1)
 
         # Reset the index
         grouped.reset_index(drop=True, inplace=True)
-        grouped = grouped[["Start date", 'Project', 'Description', 'SecDuration']]
+        grouped = grouped[["Start date", 'Project', 'Description', 'SecDuration', 'TagProductive', 'TagUnavoidable']]
         return grouped
     
     def calculate_1HUT(self, time_df, week=False):
@@ -153,6 +158,9 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
         flow_threshold=50
         daily_totals = {}
         p1HUT_dict, n1HUT_dict, nw1HUT_dict, w1HUT_dict = {}, {}, {}, {}
+
+        time_df['TagProductive'] = time_df['Tags'].str.contains('Productive')
+        time_df['TagUnavoidable'] = time_df['Tags'].str.contains('Unavoidable')
 
         productive = self.productive
         wasted = self.wasted
@@ -163,23 +171,34 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
             task_seconds = int(time_df.loc[index, "SecDuration"])
             project = time_df.loc[index, 'Project']
             task_date = time_df.at[index, 'Start date']  # Assuming 'Date' column exists
-            
+            tag_productive, tag_unavoidable = time_df.at[index, 'TagProductive'], time_df.at[index, 'TagUnavoidable']
             if task_date not in daily_totals:
               daily_totals[task_date] = {'productive': 0, 'neutral': 0, 'non_wasted': 0, 'wasted': 0}
             
             neg_dic = ["Sleep"]
             if task_seconds > 60 * flow_threshold and project not in neg_dic:
                 # print(task_date, project, time_df.loc[index, "Description"][:10], task_seconds/3600)
+                # print(tag_productive, tag_unavoidable)
                 if project in productive:
-                    daily_totals[task_date]['productive'] += task_seconds
+                    if tag_unavoidable:
+                        daily_totals[task_date]['neutral'] += task_seconds
+                    else:
+                        daily_totals[task_date]['productive'] += task_seconds
                 elif project in neutral:
-                    daily_totals[task_date]['neutral'] += task_seconds
+                    if tag_productive:
+                        daily_totals[task_date]['productive'] += task_seconds
+                    else:
+                        daily_totals[task_date]['neutral'] += task_seconds
                 elif project in wasted:
-                    if task_seconds/3600 < wasted[project]: 
+                    if tag_productive:
+                        daily_totals[task_date]['productive'] += task_seconds
+                    if tag_unavoidable:
+                        daily_totals[task_date]['neutral'] += task_seconds
+                    else:
                         daily_totals[task_date]['non_wasted'] += task_seconds
-                    if task_seconds/3600 > wasted[project]:
-                        daily_totals[task_date]['non_wasted'] += wasted[project]*3600
-                        daily_totals[task_date]['wasted'] += task_seconds - wasted[project]*3600
+                        if task_seconds/3600 > wasted[project]:
+                            print(task_date, project, task_seconds/3600, wasted[project])
+                            daily_totals[task_date]['wasted'] += task_seconds - wasted[project]*3600
         if week:
             for date in sorted(daily_totals.keys()):
                 day_data = daily_totals[date]
