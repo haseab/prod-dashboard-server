@@ -21,10 +21,10 @@ class DataLoader:
         # Getting the current date
         self.today = str(datetime.now())[:10]
         # Fetching secret values from the environment variables
-        self.user = os.getenv("email")
-        self.api_key = os.getenv("key")
-        self.account = os.getenv("account")
-        self.notion = os.getenv("notion")
+        self.TOGGL_EMAIL = os.getenv("TOGGL_EMAIL")
+        self.TOGGL_API_KEY = os.getenv("TOGGL_API_KEY")
+        self.TOGGL_WORKSPACE_ID = os.getenv("TOGGL_WORKSPACE_ID")
+        self.NOTION_TOKEN_V2 = os.getenv("NOTION_TOKEN_V2")
 
 
     def fetch_data(self, start_date=None, end_date=None, tasks_ago=None):
@@ -45,8 +45,8 @@ class DataLoader:
         page = 1
         # Parameters used to pass into API
         keys = {
-            'user_agent': self.user,
-            'workspace_id': self.account,
+            'user_agent': self.TOGGL_EMAIL,
+            'workspace_id': self.TOGGL_WORKSPACE_ID,
             'since': start_date,
             'until': end_date,
             'page': page,
@@ -57,13 +57,13 @@ class DataLoader:
 
         # Interacting with API and getting data
         data = []
-        r = requests.get(url, params=keys, headers=headers, auth=(self.api_key, 'api_token'))
+        r = requests.get(url, params=keys, headers=headers, auth=(self.TOGGL_API_KEY, 'api_token'))
 
         page_count = r.json()['total_count'] // 50 + 1
         count = 0
         for page in range(1, page_count + 1):
             keys.update(page=page)
-            data_point = requests.get(url, params=keys, headers=headers, auth=(self.api_key, 'api_token'))
+            data_point = requests.get(url, params=keys, headers=headers, auth=(self.TOGGL_API_KEY, 'api_token'))
             data += data_point.json()['data']
         datas2 = []
 
@@ -96,12 +96,12 @@ class DataLoader:
     def get_toggl_current_task(self):
         url = "https://api.track.toggl.com/api/v8/time_entries/current"
         headers = {'content-type': 'application/json'}
-        api_token = "749df022b1730c35e9f40c07b6743e52"
+        api_token = os.getenv("TOGGL_API_KEY")
         # Interacting with API and getting data
         r = requests.get(url, headers=headers, auth=(api_token, 'api_token'))
         data = r.json()['data']
 
-        projects = self._get_project_list(self.account,self.api_key)
+        projects = self._get_project_list(self.TOGGL_WORKSPACE_ID,self.TOGGL_API_KEY)
 
         project_name=projects[data['pid']]
         del data['pid']
