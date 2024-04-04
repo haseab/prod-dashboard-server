@@ -96,12 +96,14 @@ class DataLoader:
     def get_toggl_current_task(self):
         url = "https://api.track.toggl.com/api/v8/time_entries/current"
         headers = {'content-type': 'application/json'}
-        api_token = os.getenv("TOGGL_API_KEY")
         # Interacting with API and getting data
-        r = requests.get(url, headers=headers, auth=(api_token, 'api_token'))
+        r = requests.get(url, headers=headers, auth=(self.TOGGL_API_KEY, 'api_token'))
         data = r.json()['data']
 
-        projects = self._get_project_list(self.TOGGL_WORKSPACE_ID,self.TOGGL_API_KEY)
+        if (data == None):
+            return pd.DataFrame()
+        
+        projects = self._get_project_list(self.TOGGL_WORKSPACE_ID, self.TOGGL_API_KEY)
 
         project_name=projects[data['pid']]
         del data['pid']
@@ -164,7 +166,7 @@ class DataLoader:
         return (datetime.now() - timedelta(days=number_of_days_ago)).strftime('%Y-%m-%d')
 
     def _get_project_list(self, account, api_token):
-        projects = requests.get(f"https://api.track.toggl.com/api/v8/workspaces/{account}/projects", auth=(api_token, "api_token"))
+        projects = requests.get(f"https://api.track.toggl.com/api/v8/workspaces/{account}/projects", auth=(self.TOGGL_API_KEY, "api_token"))
         projects_list = projects.json()
         project_id_to_name = {project['id']: project['name'] for project in projects_list}
         return project_id_to_name
