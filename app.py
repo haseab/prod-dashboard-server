@@ -27,6 +27,21 @@ def prev_week(start_date, end_date, times=1):
 def hello_world():
     return 'Hello, World!'
 
+@app.route('/test')
+def test(loader, analyzer, start_date, end_date):
+    df = pd.DataFrame(columns=['date', 'oneHUT', "productiveTime", 'p1HUT', 'n1HUT', 'nw1HUT', 'hours_free', 'unplanned_time', "p1hut%", "productive%", 'w1HUT', "wastedTime", "nonWastedTime", 'Np1HUT', 'Nn1HUT', 'Nw1HUT', 'Nnw1HUT'])
+    time_df = loader.fetch_data(start_date, end_date)
+    # Flow calculation
+    p1HUT, n1HUT, nw1HUT, w1HUT, Np1HUT, Nn1HUT, Nw1HUT, Nnw1HUT = analyzer.calculate_1HUT(time_df=time_df, week=False).values()
+    # Unplanned time Calculation
+    unplanned_time = analyzer.calculate_unplanned_time(start_date, end_date, week=False)
+    # Efficiency Calculation
+    hours_free, efficiency, inefficiency, productive, neutral, wasted, non_wasted = analyzer.efficiency(loader, time_df, week=False).values()
+    oneHUT = p1HUT + n1HUT + nw1HUT + w1HUT
+    df = pd.concat([df, pd.DataFrame([[start_date, oneHUT, productive, p1HUT, n1HUT, nw1HUT, hours_free, unplanned_time, efficiency, round(productive/hours_free,3), w1HUT, inefficiency, non_wasted, Np1HUT, Nn1HUT, Nw1HUT, Nnw1HUT]], 
+                                columns=['date', 'oneHUT', 'productiveTime', 'p1HUT', 'n1HUT', 'nw1HUT', 'hours_free', 'unplanned_time', "p1hut%", "productive%", 'w1HUT', "wasted%", "nonWastedTime", 'Np1HUT', 'Nn1HUT', 'Nw1HUT', 'Nnw1HUT'])])
+    start_date, end_date = analyzer.prev_week(start_date, end_date)
+
 @app.route('/metrics')
 def metrics():
     # response = jsonify({"message": "Data from Python serveOr"})
