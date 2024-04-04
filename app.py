@@ -12,7 +12,7 @@ import json
 app = Flask(__name__)
 CORS(app)
 
-historical_view = True
+historical_view = False
 
 def prev_week(start_date, end_date, times=1):
     if (times == 0):
