@@ -268,10 +268,18 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
                 day_totals['hours_free'] += seconds
 
                 if project in neutral:
-                    day_totals['hours_free'] -= seconds
-                    day_totals['neutral'] += seconds
+                    if tag_productive:
+                        productive_seconds = seconds
+                        day_totals['productive'] += productive_seconds
+                    else:
+                        day_totals['hours_free'] -= seconds
+                        day_totals['neutral'] += seconds
                 elif project in productive:
                     day_totals['productive'] += seconds
+                    if tag_unavoidable:
+                        neutral_seconds = seconds
+                        day_totals['neutral'] += neutral_seconds
+                        day_totals['hours_free'] -= neutral_seconds
                 elif project in wasted.keys():
                     wasted_seconds = seconds #3600
                     if tag_productive:
@@ -282,6 +290,7 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
                         neutral_seconds = seconds
                         wasted_seconds -= neutral_seconds
                         day_totals['neutral'] += neutral_seconds
+                        day_totals['hours_free'] -= neutral_seconds
                     non_wasted_seconds = min(wasted_seconds, wasted[project] * 3600)
                     day_totals['non_wasted'] += non_wasted_seconds
                     day_totals['wasted'] += (wasted_seconds - non_wasted_seconds)
@@ -297,4 +306,5 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
         if week:
             return daily_metrics
         else:
-            return {metric: sum(daily_metrics[metric].values()) for metric in daily_metrics}
+            return {metric: round(sum(daily_metrics[metric].values())/7,4) for metric in daily_metrics}
+

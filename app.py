@@ -12,7 +12,7 @@ import json
 app = Flask(__name__)
 CORS(app)
 
-historical_view = False
+historical_view = True
 
 def prev_week(start_date, end_date, times=1):
     if (times == 0):
@@ -53,7 +53,7 @@ def metrics():
 
     if historical_view:
         now_df = pd.DataFrame(columns=['Id', 'Project', 'Description', 'Start date', 'Start time', 'End date', 'End time', 'Tags', 'SecDuration'])
-        start_date, end_date = "2024-03-25", "2024-03-31"
+        start_date, end_date = "2024-04-01", "2024-04-07"
         start_date, end_date = prev_week(start_date, end_date, times=0)
         print(start_date, end_date)
         start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
