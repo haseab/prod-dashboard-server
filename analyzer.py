@@ -130,13 +130,24 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
 
     def group_df(self, time_df):
     # Create a DataFrame
-        df = pd.DataFrame(time_df, columns=['Id',"Start date", 'Project', 'Description', 'SecDuration', 'TagProductive', 'TagUnavoidable'])
+        df = pd.DataFrame(time_df, columns=['Id',"Start date", 'Project', 'Description', 'SecDuration', 'TagProductive', 'TagUnavoidable', 'Carryover', 'FlowExempt'])
 
         # Remove all Time entries that have ["Tracking", "Planning", "Eating", "Getting Ready", "Washroom"] , in the Project column and ALSO are under 100 seconds in SecDuration column
         df = df[~((df['Project'].isin(["Tracking", "Planning", "Eating", "Getting Ready", "Washroom", "Messaging", "Calling", "Maintenance", "People", "Relationship", "Analyzing", "Emailing", "Listening", "Organizing", "Thinking", "Food Prep/Clean/Order", "Recalling", "Unavoidable Intermission", "Technicalities"])) & (df['SecDuration'] < 100))]
+        # print('FLOW EXEMPT')
+        # print(time_df)
+        # print(df['FlowExempt'].values)
+        df = df[~df['FlowExempt']]
 
-        # Add a column to track the group of consecutive projects
-        df['Group'] = (df['Project'] != df['Project'].shift()).cumsum()
+        # Mark Projects that are in self.productive as 'Productive'
+        df['TagProductive'] = df['Project'].isin(self.productive) | df['TagProductive']
+        df['ProjectTag'] = df['Project'] + ' ' + df['TagProductive'].astype(str)
+        df['Shifted ProjectTag'] = df['ProjectTag'].shift()
+        shifted_carryover = df['Carryover'].shift(-1).fillna(False)
+        df['Carryover'] = df['Carryover'] | shifted_carryover
+        df['Shifted Carryover'] = df['Carryover'].shift()
+        df['PreGroup'] = ~((df['ProjectTag'] == df['ProjectTag'].shift()) | (df['Carryover'] & df['Carryover'].shift()))
+        df["Group"] = (~((df['ProjectTag'] == df['ProjectTag'].shift()) | (df['Carryover'] & df['Carryover'].shift()))).cumsum()
 
         # Group by the 'Group' column, and aggregate the 'SecDuration' using sum()
         # Also, take the first value of 'Project' for each group
@@ -144,8 +155,8 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
             "Start date": "first",
             'Project': 'first',
             'SecDuration': 'sum',
-            'TagProductive': 'any',
-            'TagUnavoidable': 'any'
+            'TagProductive': 'all',
+            'TagUnavoidable': 'all'
         })
 
         # Update the 'Description' based on whether the group contains more than one row
@@ -164,6 +175,8 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
 
         time_df['TagProductive'] = time_df['Tags'].str.contains('Productive')
         time_df['TagUnavoidable'] = time_df['Tags'].str.contains('Unavoidable')
+        time_df['Carryover'] = time_df['Tags'].str.contains('Carryover')
+        time_df['FlowExempt'] = time_df['Tags'].str.contains('FlowExempt')
 
         productive = self.productive
         wasted = self.wasted
@@ -185,8 +198,12 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
                 if project in productive:
                     if tag_unavoidable:
                         daily_totals[task_date]['neutral'] += task_seconds
-                    else:
+                    elif tag_productive:
                         daily_totals[task_date]['productive'] += task_seconds
+                    else:
+                        print("PLEASE TAG YOUR CARRYOVER TASKS PROPERLY")
+                        print(task_date, project, time_df.loc[index, "Description"][:10], task_seconds/3600)
+                        raise ValueError("PLEASE TAG YOUR CARRYOVER TASKS PROPERLY")
                 elif project in neutral:
                     if tag_productive:
                         daily_totals[task_date]['productive'] += task_seconds

@@ -68,6 +68,10 @@ def metrics():
     start_date, end_date= str(start_datetime)[:10], str(end_datetime)[:10]
     time_df = l.fetch_data(start_date, end_date)
     master_df = pd.concat([time_df,now_df]).reset_index(drop=True)
+    master_df['TagProductive'] = master_df['Tags'].str.contains('Productive')
+    master_df['TagUnavoidable'] = master_df['Tags'].str.contains('Unavoidable')
+    master_df['Carryover'] = master_df['Tags'].str.contains('Carryover')
+    master_df['FlowExempt'] = master_df['Tags'].str.contains('FlowExempt')
     flow_df = a.group_df(master_df)
     flow = round(flow_df.iloc[-1]['SecDuration']/3600,3) if not historical_view else 0
     unplanned_time = a.calculate_unplanned_time(start_date, end_date, week=True)
