@@ -133,10 +133,8 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
         df = pd.DataFrame(time_df, columns=['Id',"Start date", 'Project', 'Description', 'SecDuration', 'TagProductive', 'TagUnavoidable', 'Carryover', 'FlowExempt'])
 
         # Remove all Time entries that have ["Tracking", "Planning", "Eating", "Getting Ready", "Washroom"] , in the Project column and ALSO are under 100 seconds in SecDuration column
-        df = df[~((df['Project'].isin(["Tracking", "Planning", "Eating", "Getting Ready", "Washroom", "Messaging", "Calling", "Maintenance", "People", "Relationship", "Analyzing", "Emailing", "Listening", "Organizing", "Thinking", "Food Prep/Clean/Order", "Recalling", "Unavoidable Intermission", "Technicalities"])) & (df['SecDuration'] < 100))]
-        # print('FLOW EXEMPT')
-        # print(time_df)
-        # print(df['FlowExempt'].values)
+        # df = df[~((df['Project'].isin(["Tracking", "Planning", "Eating", "Getting Ready", "Washroom", "Messaging", "Calling", "Maintenance", "People", "Relationship", "Analyzing", "Emailing", "Listening", "Organizing", "Thinking", "Food Prep/Clean/Order", "Recalling", "Unavoidable Intermission", "Technicalities"])) & (df['SecDuration'] < 100))]
+
         df = df[~df['FlowExempt']]
 
         # Mark Projects that are in self.productive as 'Productive'
