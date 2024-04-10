@@ -54,7 +54,7 @@ def metrics():
     if historical_view:
         now_df = pd.DataFrame(columns=['Id', 'Project', 'Description', 'Start date', 'Start time', 'End date', 'End time', 'Tags', 'SecDuration'])
         start_date, end_date = "2024-04-01", "2024-04-07"
-        start_date, end_date = prev_week(start_date, end_date, times=0)
+        start_date, end_date = prev_week(start_date, end_date, times=2)
         print(start_date, end_date)
         start_datetime = datetime.strptime(start_date, '%Y-%m-%d')
         end_datetime = datetime.strptime(end_date, '%Y-%m-%d')
@@ -74,6 +74,7 @@ def metrics():
     master_df['FlowExempt'] = master_df['Tags'].str.contains('FlowExempt')
     flow_df = a.group_df(master_df)
     flow = round(flow_df.iloc[-1]['SecDuration']/3600,3) if not historical_view else 0
+    master_df = master_df.drop(columns=["TagProductive", "TagUnavoidable", "Carryover", "FlowExempt"], axis=1)
     unplanned_time = a.calculate_unplanned_time(start_date, end_date, week=True)
     p1HUT, n1HUT, nw1HUT, w1HUT = a.calculate_1HUT(master_df, week=True).values()
     hours_free, efficiency, inefficiency, productive, neutral, wasted, non_wasted = a.efficiency(l, master_df, week=True).values()
