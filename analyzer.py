@@ -55,6 +55,15 @@ class Analyzer:
 
         return round(max_mindful / 3600, 2), round(max_slow / 3600, 2)
     
+    def prev_week(self, start_date, end_date, times=1):
+        if (times == 0):
+            return start_date, end_date
+        if (times == 1):
+            datetimes = pd.date_range(start_date, end_date).to_pydatetime()
+            return str(datetimes[0]-timedelta(days=7))[:10], str(datetimes[-1] - timedelta(days=7))[:10]
+        start_date, end_date = self.prev_week(start_date, end_date)
+        return self.prev_week(start_date, end_date, times-1)
+    
     def get_all_current_events(self, cal_dic):
         date_before = datetime.now().astimezone()
         date_after = datetime.now().astimezone() + timedelta(minutes=0.5)
