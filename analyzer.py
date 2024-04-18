@@ -59,7 +59,7 @@ class Analyzer:
     def prev_week(self, start_date, end_date, times=1):
         if (times == 0):
             return start_date, end_date
-        if (times == 1):
+        if (times == 1): 
             datetimes = pd.date_range(start_date, end_date).to_pydatetime()
             return str(datetimes[0]-timedelta(days=7))[:10], str(datetimes[-1] - timedelta(days=7))[:10]
         start_date, end_date = self.prev_week(start_date, end_date)
