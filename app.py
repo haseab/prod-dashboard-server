@@ -129,7 +129,7 @@ def metrics():
             ]
         )
         start_date, end_date = "2024-04-15", "2024-04-21"
-        start_date, end_date = a.prev_week(start_date, end_date, times=1)
+        start_date, end_date = a.prev_week(start_date, end_date, times=0)
         print(start_date, end_date)
         start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
         end_datetime = datetime.strptime(end_date, "%Y-%m-%d")
