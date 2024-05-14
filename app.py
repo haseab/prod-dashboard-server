@@ -12,7 +12,7 @@ import json
 app = Flask(__name__)
 CORS(app)
 
-historical_view = False
+historical_view = True
 
 
 @app.route("/")
@@ -128,7 +128,7 @@ def metrics():
                 "SecDuration",
             ]
         )
-        start_date, end_date = "2024-04-29", "2024-05-05"
+        start_date, end_date = "2024-05-06", "2024-05-12"
         start_date, end_date = a.prev_week(start_date, end_date, times=0)
         print(start_date, end_date)
         start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
