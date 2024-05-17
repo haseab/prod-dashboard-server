@@ -405,8 +405,14 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
 
             neg_dic = ["Sleep"]
             if task_seconds > 60 * flow_threshold and project not in neg_dic:
-                # print(task_date, project, time_df.loc[index, 'Start time'], time_df.loc[index, "Description"][:30], task_seconds/3600)
-                # print(tag_productive, tag_unavoidable)
+                print(
+                    task_date,
+                    project,
+                    time_df.loc[index, "Start time"],
+                    time_df.loc[index, "Description"][:30],
+                    task_seconds / 3600,
+                )
+                print(tag_productive, tag_unavoidable)
                 if project in productive:
                     if tag_unavoidable:
                         daily_totals[task_date]["neutral"] += task_seconds
