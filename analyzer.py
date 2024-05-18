@@ -526,7 +526,7 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
         data["SecDuration"] = data["SecDuration"].astype(int)
         grouped_data = (
             data.groupby(["Start date", "Project", "TagProductive", "TagUnavoidable"])
-            .sum()
+            .sum(numeric_only=True)
             .reset_index()
         )
 
