@@ -159,10 +159,13 @@ def metrics():
         a.efficiency(l, master_df, week=True).values()
     )
     oneHUT = {
-        date: n1HUT.get(date, 0)
-        + nw1HUT.get(date, 0)
-        + p1HUT.get(date, 0)
-        + w1HUT.get(date, 0)
+        date: round(
+            n1HUT.get(date, 0)
+            + nw1HUT.get(date, 0)
+            + p1HUT.get(date, 0)
+            + w1HUT.get(date, 0),
+            3,
+        )
         for date in n1HUT
     }
 
