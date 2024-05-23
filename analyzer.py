@@ -159,7 +159,7 @@ class Analyzer:
 
         return round(max_mindful / 3600, 2), round(max_slow / 3600, 2)
 
-    def prev_week(self, start_date, end_date, times=1):
+    def prev_week(self, start_date, end_date, times=0):
         if times == 0:
             return start_date, end_date
         if times == 1:
