@@ -128,9 +128,9 @@ def metrics():
                 "SecDuration",
             ]
         )
-        start_date, end_date = "2024-05-27", "2024-06-02"
-        start_date, end_date = a.prev_week(start_date, end_date, times=0)
-        print(start_date, end_date)
+        start_date, end_date = "2024-06-10", "2024-06-16"
+        start_date, end_date = a.prev_week(start_date, end_date, times=11)
+        # print("start date", start_date, "end date", end_date)
         start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
         end_datetime = datetime.strptime(end_date, "%Y-%m-%d")
     else:
