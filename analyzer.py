@@ -159,17 +159,46 @@ class Analyzer:
 
         return round(max_mindful / 3600, 2), round(max_slow / 3600, 2)
 
-    def prev_week(self, start_date, end_date, times=0):
+    # def prev_week(self, start_date, end_date, times=0):
+    #     if times == 0:
+    #         return start_date, end_date
+    #     if times == 1:
+    #         datetimes = pd.date_range(start_date, end_date).to_pydatetime()
+    #         return (
+    #             str(datetimes[0] - timedelta(days=7))[:10],
+    #             str(datetimes[-1] - timedelta(days=7))[:10],
+    #         )
+    #     start_date, end_date = self.prev_week(start_date, end_date)
+    #     return self.prev_week(start_date, end_date, times - 1)
+
+    def prev_week(self, start_date, end_date, times=1):
+        """
+        Calculate the date range of the 'times' previous weeks from a given date range.
+
+        Parameters:
+            start_date (str): The start date in 'YYYY-MM-DD' format.
+            end_date (str): The end date in 'YYYY-MM-DD' format.
+            times (int): The number of weeks back to calculate the date range.
+
+        Returns:
+            tuple: A tuple containing the start and end dates of the calculated previous week range as strings.
+        """
+        # Base case: if times is 0, return the original dates
         if times == 0:
             return start_date, end_date
-        if times == 1:
-            datetimes = pd.date_range(start_date, end_date).to_pydatetime()
-            return (
-                str(datetimes[0] - timedelta(days=7))[:10],
-                str(datetimes[-1] - timedelta(days=7))[:10],
-            )
-        start_date, end_date = self.prev_week(start_date, end_date)
-        return self.prev_week(start_date, end_date, times - 1)
+
+        # Convert start_date and end_date to datetime objects
+        start_date_dt = pd.to_datetime(start_date)
+        end_date_dt = pd.to_datetime(end_date)
+
+        # Calculate the start and end dates of the previous week
+        start_date_prev = start_date_dt - timedelta(weeks=1)
+        end_date_prev = end_date_dt - timedelta(weeks=1)
+
+        # Recursive call to handle multiple weeks
+        return self.prev_week(
+            str(start_date_prev)[:10], str(end_date_prev)[:10], times - 1
+        )
 
     def get_all_current_events(self, cal_dic):
         date_before = datetime.now().astimezone()
