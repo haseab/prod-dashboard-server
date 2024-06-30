@@ -2,11 +2,11 @@ import pandas as pd
 from flask import Flask
 from flask_cors import CORS
 
-from src.analyzer import Analyzer
-from src.dataloader import DataLoader
-from src.helper import Helper
+from analyzer import Analyzer
+from dataloader import DataLoader
+from helper import Helper
 from datetime import datetime, timedelta
-from src.constants import TIME_MAP
+from constants import TIME_MAP
 
 import json
 
@@ -177,18 +177,18 @@ def metrics():
         for date in n1HUT
     }
 
-    # Getting Distraction Data
-    df = pd.read_csv(
-        "/Users/haseab/Desktop/Desktop/backed-up/backed-scripts/Python/TiBA/src/keyboard_shortcut_launches.csv"
-    )
-    df["Time"] = pd.to_datetime(df["Time"], errors="coerce")
-    df = df[(df["Time"] >= start_datetime) & (df["Time"] <= end_datetime)]
-    df.set_index("Time", inplace=True)
-    command_df = df[df["Keyboard Shortcut"] == "Command + `"]
-    daily_counts = command_df.resample("D").count()
-    daily_counts.index = daily_counts.index.strftime("%Y-%m-%d")
-    daily_counts = (daily_counts / 2).astype(int)
-    daily_counts_dict = daily_counts.to_dict()["Keyboard Shortcut"]
+    # # Getting Distraction Data
+    # df = pd.read_csv(
+    #     "/Users/haseab/Desktop/Desktop/backed-up/backed-scripts/Python/TiBA/src/keyboard_shortcut_launches.csv"
+    # )
+    # df["Time"] = pd.to_datetime(df["Time"], errors="coerce")
+    # df = df[(df["Time"] >= start_datetime) & (df["Time"] <= end_datetime)]
+    # df.set_index("Time", inplace=True)
+    # command_df = df[df["Keyboard Shortcut"] == "Command + `"]
+    # daily_counts = command_df.resample("D").count()
+    # daily_counts.index = daily_counts.index.strftime("%Y-%m-%d")
+    # daily_counts = (daily_counts / 2).astype(int)
+    # daily_counts_dict = daily_counts.to_dict()["Keyboard Shortcut"]
 
     return_object = {
         "unplannedTimeList": unplanned_time,
@@ -201,7 +201,7 @@ def metrics():
         "hoursFreeList": hours_free,
         "efficiencyList": efficiency,
         "productiveList": productive,
-        "distractionCountList": daily_counts_dict,
+        "distractionCountList": [],
         "inefficiencyList": inefficiency,
         "flow": flow,
         "startDate": start_date,
