@@ -6,7 +6,7 @@ from analyzer import Analyzer
 from dataloader import DataLoader
 from helper import Helper
 from datetime import datetime, timedelta
-from config import TIME_MAP
+from constants import TIME_MAP
 
 import json
 
