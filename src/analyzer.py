@@ -5,7 +5,7 @@ import pandas as pd
 from dotenv import load_dotenv
 from gcsa.google_calendar import GoogleCalendar
 
-from helper import Helper as helper
+from src.helper import Helper as helper
 
 
 class Analyzer:
