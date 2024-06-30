@@ -2,11 +2,11 @@ import pandas as pd
 from flask import Flask
 from flask_cors import CORS
 
-from analyzer import Analyzer
-from dataloader import DataLoader
-from helper import Helper
+from src.analyzer import Analyzer
+from src.dataloader import DataLoader
+from src.helper import Helper
 from datetime import datetime, timedelta
-from constants import TIME_MAP
+from src.constants import TIME_MAP
 
 import json
 
