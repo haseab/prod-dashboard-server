@@ -13,8 +13,8 @@ from src.helper import Helper as helper
 class Analyzer:
     def __init__(self):
         load_dotenv()
-        credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-        self.credentials = self.load_credentials(credentials_path)
+        # credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+        # self.credentials = self.load_credentials(credentials_path)
 
         # self.unplanned = GoogleCalendar(
         #     default_calendar=os.getenv("UNPLANNED_CALENDAR_ID"),
