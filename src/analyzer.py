@@ -16,10 +16,10 @@ class Analyzer:
         credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
         self.credentials = self.load_credentials(credentials_path)
 
-        self.unplanned = GoogleCalendar(
-            default_calendar=os.getenv("UNPLANNED_CALENDAR_ID"),
-            credentials=self.credentials,
-        )
+        # self.unplanned = GoogleCalendar(
+        #     default_calendar=os.getenv("UNPLANNED_CALENDAR_ID"),
+        #     credentials=self.credentials,
+        # )
 
         self.wasted = {
             "Trading": 2,
