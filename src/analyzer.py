@@ -11,7 +11,10 @@ from src.helper import Helper as helper
 class Analyzer:
     def __init__(self):
         load_dotenv()
-        self.unplanned = GoogleCalendar(os.getenv("UNPLANNED_CALENDAR_ID"))
+        self.unplanned = GoogleCalendar(
+            default_calendar=os.getenv("UNPLANNED_CALENDAR_ID"),
+            credentials=os.getenv("GOOGLE_APPLICATION_CREDENTIALS"),
+        )
         self.wasted = {
             "Trading": 2,
             "TV Show": 0,
