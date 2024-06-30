@@ -81,7 +81,7 @@ def metrics():
     master_df = master_df.drop(
         columns=["TagProductive", "TagUnavoidable", "Carryover", "FlowExempt"], axis=1
     )
-    unplanned_time = a.calculate_unplanned_time(start_date, end_date, week=True)
+    # unplanned_time = a.calculate_unplanned_time(start_date, end_date, week=True)
     p1HUT, n1HUT, nw1HUT, w1HUT = a.calculate_1HUT(master_df, week=True).values()
     hours_free, efficiency, inefficiency, productive, neutral, wasted, non_wasted = (
         a.efficiency(l, master_df, week=True).values()
@@ -111,7 +111,7 @@ def metrics():
     # daily_counts_dict = daily_counts.to_dict()["Keyboard Shortcut"]
 
     return_object = {
-        "unplannedTimeList": unplanned_time,
+        "unplannedTimeList": [],
         "oneHUTList": oneHUT,
         "p1HUTList": p1HUT,
         "n1HUTList": n1HUT,
