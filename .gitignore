@@ -10,6 +10,8 @@ ENV/
 bin/
 pyvenv.cfg
 
+/local
+
 # PyCharm project settings
 .idea/
 

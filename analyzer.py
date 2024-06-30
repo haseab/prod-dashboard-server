@@ -614,12 +614,15 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
 
         # Calculating hours free and efficiency for each day and adding to daily_metrics
         for date in daily_metrics["hours_free"]:
-            daily_metrics["efficiency"][date] = round(
-                daily_metrics["productive"][date] / daily_metrics["hours_free"][date], 4
-            )
-            daily_metrics["inefficiency"][date] = round(
-                daily_metrics["wasted"][date] / daily_metrics["hours_free"][date], 4
-            )
+            if (daily_metrics["hours_free"][date]) != 0:
+                daily_metrics["efficiency"][date] = round(
+                    daily_metrics["productive"][date]
+                    / daily_metrics["hours_free"][date],
+                    4,
+                )
+                daily_metrics["inefficiency"][date] = round(
+                    daily_metrics["wasted"][date] / daily_metrics["hours_free"][date], 4
+                )
 
         if week:
             return daily_metrics

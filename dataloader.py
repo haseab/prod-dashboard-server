@@ -210,14 +210,14 @@ class DataLoader:
         df2 = pd.DataFrame([data.values()], columns=columns)
 
         df2["Start"] = pd.to_datetime(df2["Start"], utc=True)
-        df2["Start"] = df2["Start"].dt.tz_convert("Canada/Eastern").dt.tz_localize(None)
+        df2["Start"] = df2["Start"].dt.tz_convert("US/Pacific").dt.tz_localize(None)
 
         df2 = df2.drop("At", axis=1)
 
         df2["End"] = datetime.utcnow().replace(
             tzinfo=pytz.utc
         )  # Make 'End' timezone aware
-        df2["End"] = df2["End"].dt.tz_convert("Canada/Eastern").dt.tz_localize(None)
+        df2["End"] = df2["End"].dt.tz_convert("US/Pacific").dt.tz_localize(None)
 
         secDuration = float((df2["End"] - df2["Start"]).dt.total_seconds())
 
