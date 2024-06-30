@@ -10,6 +10,7 @@ ENV/
 bin/
 pyvenv.cfg
 
+/share
 /local
 
 # PyCharm project settings
