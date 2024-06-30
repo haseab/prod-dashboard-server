@@ -6,6 +6,7 @@ from analyzer import Analyzer
 from dataloader import DataLoader
 from helper import Helper
 from datetime import datetime, timedelta
+from config import TIME_MAP
 
 import json
 
@@ -112,7 +113,13 @@ def metrics():
     ## Getting Toggl & Calendar Data
     l = DataLoader()
     a = Analyzer()
+
     now = datetime.now()
+
+    current_task = l.get_toggl_current_task()
+    current_activity = (
+        current_task.iloc[0]["Project"] if not current_task.empty else "No Activity"
+    )
 
     if historical_view:
         now_df = pd.DataFrame(
@@ -134,7 +141,7 @@ def metrics():
         start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
         end_datetime = datetime.strptime(end_date, "%Y-%m-%d")
     else:
-        now_df = l.get_toggl_current_task()
+        now_df = current_task
         start_datetime, end_datetime = now - timedelta(days=now.weekday()), now
 
     start_datetime = start_datetime.replace(hour=0, minute=0, second=0, microsecond=0)
@@ -146,6 +153,7 @@ def metrics():
     master_df["TagUnavoidable"] = master_df["Tags"].str.contains("Unavoidable")
     master_df["Carryover"] = master_df["Tags"].str.contains("Carryover")
     master_df["FlowExempt"] = master_df["Tags"].str.contains("FlowExempt")
+
     flow_df = a.group_df(master_df)
     flow = (
         round(flow_df.iloc[-1]["SecDuration"] / 3600, 3) if not historical_view else 0
@@ -198,6 +206,7 @@ def metrics():
         "flow": flow,
         "startDate": start_date,
         "endDate": end_date,
+        "currentActivity": TIME_MAP[current_activity],
     }
 
     pretty_json = json.dumps(return_object, indent=4)
