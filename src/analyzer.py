@@ -3,6 +3,8 @@ from datetime import datetime, timedelta
 
 import pandas as pd
 from dotenv import load_dotenv
+from google.oauth2 import service_account
+
 from gcsa.google_calendar import GoogleCalendar
 
 from src.helper import Helper as helper
@@ -11,10 +13,14 @@ from src.helper import Helper as helper
 class Analyzer:
     def __init__(self):
         load_dotenv()
+        credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+        self.credentials = self.load_credentials(credentials_path)
+
         self.unplanned = GoogleCalendar(
             default_calendar=os.getenv("UNPLANNED_CALENDAR_ID"),
-            credentials=os.getenv("GOOGLE_APPLICATION_CREDENTIALS"),
+            credentials=self.credentials,
         )
+
         self.wasted = {
             "Trading": 2,
             "TV Show": 0,
@@ -103,6 +109,9 @@ class Analyzer:
             "Formal Working",
             "Emailing",
         ]
+
+    def load_credentials(self, credentials_path):
+        return service_account.Credentials.from_service_account_file(credentials_path)
 
     def max_mindful_slow(self, data):
         mindful_whitelist = ["Sleep", "Concentration", "Under Influence"]
