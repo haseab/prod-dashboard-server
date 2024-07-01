@@ -69,6 +69,13 @@ class DataLoader:
         project_dic = self._get_project_list(
             self.TOGGL_WORKSPACE_ID, self.TOGGL_API_KEY
         )
+
+        print("PRINTING TAG DIC")
+        print(tag_dic)
+
+        print("PRINTING PROJECT DIC")
+        print(project_dic)
+
         # Converting JSON into a list of lists format
         for dic in data:
             dic.update(dic["time_entries"][0])
