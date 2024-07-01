@@ -19,7 +19,7 @@ TIME_MAP = {
     "News": "📰 Consuming News",
     "Under Influence": "🍺 Having Fun lol",
     "Gaming": "🎮 Playing",
-    "Surfing Casually": "📚 Reading",
+    "Surfing Casually": "🌐 Surfing Mindlessly",
     "Relationship": "👱‍♂️ with People",
     "Washroom": "🚽 in Washroom",
     "Transportation": "🚗 On the Move",
