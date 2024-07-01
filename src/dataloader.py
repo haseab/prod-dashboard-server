@@ -61,6 +61,10 @@ class DataLoader:
             auth=(self.TOGGL_API_KEY, "api_token"),
         ).json()
 
+        print("PRINTING DATA")
+        print(data[0])
+        print("LENGTH OF DATA", len(data))
+
         tag_dic = self._get_tag_list(self.TOGGL_WORKSPACE_ID, self.TOGGL_API_KEY)
         project_dic = self._get_project_list(
             self.TOGGL_WORKSPACE_ID, self.TOGGL_API_KEY
