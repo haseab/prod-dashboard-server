@@ -67,6 +67,7 @@ def metrics():
     start_datetime = start_datetime.replace(hour=0, minute=0, second=0, microsecond=0)
     end_datetime = end_datetime.replace(hour=23, minute=59, second=59, microsecond=0)
     start_date, end_date = str(start_datetime)[:10], str(end_datetime)[:10]
+    print("start date", start_date, "end date", end_date)
     time_df = l.fetch_data(start_date, end_date)
     master_df = pd.concat([time_df, now_df]).reset_index(drop=True)
     master_df["TagProductive"] = master_df["Tags"].str.contains("Productive")
