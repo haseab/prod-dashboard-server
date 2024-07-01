@@ -75,6 +75,9 @@ class DataLoader:
         df2 = pd.DataFrame(data)
         ## Capitalize the first letter of every column
         df2.columns = [column[0].upper() + column[1:] for column in df2.columns]
+
+        print("PRINTING DF2")
+        print(df2.head())
         ## Choosing which columns to be used
         df2 = df2[["Id", "Project", "Description", "Start", "End", "Tags"]]
         ## Separating start_date column from start_time column and end_date from end_time
