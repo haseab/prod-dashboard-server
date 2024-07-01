@@ -36,9 +36,9 @@ def metrics():
     l = DataLoader()
     a = Analyzer()
 
+    now_utc = datetime.now(pytz.utc)
     pst = pytz.timezone("America/Los_Angeles")
-    now = datetime.now()
-    now = pst.localize(now)
+    now = now_utc.astimezone(pst)
 
     current_task = l.get_toggl_current_task()
     current_activity = (

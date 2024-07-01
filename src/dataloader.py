@@ -36,9 +36,9 @@ class DataLoader:
         """
         # Assuming they did not pass in a start and end date
 
+        now_utc = datetime.now(pytz.utc)
         pst = pytz.timezone("America/Los_Angeles")
-        now = datetime.now()
-        now = pst.localize(now)
+        now = now_utc.astimezone(pst)
 
         if start_date == None:
             start_date = str(now)[:10]
