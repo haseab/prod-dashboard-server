@@ -66,7 +66,7 @@ TIME_MAP = {
     "Event": "🎉 at Event",
     "Business": "💼 Doing Business",
     "Book": "📚 Reading",
-    "Report": "🖊️ Writing Report",
+    "Report": "🖊️ Journaling",
     "Crypto": "🧑‍🦯 In Between Tasks",
     "Helping/Giving": "🤝 Helping",
     "Meeting": "🤝 Meeting",
