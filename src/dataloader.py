@@ -42,6 +42,12 @@ class DataLoader:
         if end_date == None:
             end_date = self.today
 
+        print("checking env vars")
+        print("TOGGL EMAIL", self.TOGGL_EMAIL)
+        print("TOGGL API KEY", self.TOGGL_API_KEY)
+        print("TOGGL WORKSPACE ID", self.TOGGL_WORKSPACE_ID)
+        print("NOTION TOKEN V2", self.NOTION_TOKEN_V2)
+
         data = requests.post(
             f"https://api.track.toggl.com/reports/api/v3/workspace/{self.TOGGL_WORKSPACE_ID}/search/time_entries",
             json={
