@@ -35,17 +35,17 @@ class DataLoader:
         :return: pandas dataframe, the time data
         """
         # Assuming they did not pass in a start and end date
+
+        pst = pytz.timezone("America/Los_Angeles")
+        now = datetime.now()
+        now = pst.localize(now)
+
         if start_date == None:
-            start_date = str(datetime.now())[:10]
+            start_date = str(now)[:10]
         if end_date == None:
-            end_date = str(datetime.now())[:10]
+            end_date = str(now)[:10]
 
         print("start date", start_date, "end date", end_date)
-        print("checking env vars")
-        print("TOGGL EMAIL", self.TOGGL_EMAIL)
-        print("TOGGL API KEY", self.TOGGL_API_KEY)
-        print("TOGGL WORKSPACE ID", self.TOGGL_WORKSPACE_ID)
-        print("NOTION TOKEN V2", self.NOTION_TOKEN_V2)
 
         data = requests.post(
             f"https://api.track.toggl.com/reports/api/v3/workspace/{self.TOGGL_WORKSPACE_ID}/search/time_entries",
