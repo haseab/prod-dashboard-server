@@ -19,8 +19,6 @@ class DataLoader:
         # Load environment variables from .env file
         load_dotenv()
 
-        # Getting the current date
-        self.today = str(datetime.now())[:10]
         # Fetching secret values from the environment variables
         self.TOGGL_EMAIL = os.getenv("TOGGL_EMAIL")
         self.TOGGL_API_KEY = os.getenv("TOGGL_API_KEY")
@@ -38,10 +36,11 @@ class DataLoader:
         """
         # Assuming they did not pass in a start and end date
         if start_date == None:
-            start_date = self.today
+            start_date = str(datetime.now())[:10]
         if end_date == None:
-            end_date = self.today
+            end_date = str(datetime.now())[:10]
 
+        print("start date", start_date, "end date", end_date)
         print("checking env vars")
         print("TOGGL EMAIL", self.TOGGL_EMAIL)
         print("TOGGL API KEY", self.TOGGL_API_KEY)
@@ -130,9 +129,9 @@ class DataLoader:
     def old_fetch_data(self, start_date=None, end_date=None, tasks_ago=None):
         # Assuming they did not pass in a start and end date
         if start_date == None:
-            start_date = self.today
+            start_date = str(datetime.now())[:10]
         if end_date == None:
-            end_date = self.today
+            end_date = str(datetime.now())[:10]
 
         page = 1
         # Parameters used to pass into API
