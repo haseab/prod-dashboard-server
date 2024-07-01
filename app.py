@@ -1,5 +1,5 @@
 import pandas as pd
-from flask import Flask
+from flask import Flask, request, jsonify
 from flask_cors import CORS
 
 from src.analyzer import Analyzer
@@ -36,6 +36,8 @@ def metrics():
     l = DataLoader()
     a = Analyzer()
 
+    personal = request.args.get("personal")
+
     now_utc = datetime.now(pytz.utc)
     pst = pytz.timezone("America/Los_Angeles")
     now = now_utc.astimezone(pst)
@@ -66,7 +68,12 @@ def metrics():
         end_datetime = datetime.strptime(end_date, "%Y-%m-%d")
     else:
         now_df = current_task
-        start_datetime, end_datetime = now - timedelta(days=now.weekday()), now
+        if personal == "true":
+            ## set start and end date to the beginning and current time of the week
+            start_datetime, end_datetime = now - timedelta(days=now.weekday()), now
+        else:
+            ## set start date to the beggining of 7 days ago and end date to current time
+            start_datetime, end_datetime = now - timedelta(days=6), now
 
     start_datetime = start_datetime.replace(hour=0, minute=0, second=0, microsecond=0)
     end_datetime = end_datetime.replace(hour=23, minute=59, second=59, microsecond=0)
