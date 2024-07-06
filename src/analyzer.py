@@ -15,6 +15,10 @@ class Analyzer:
     def __init__(self):
         load_dotenv()
         credentials = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+
+        if not credentials:
+            raise ValueError("GOOGLE_APPLICATION_CREDENTIALS environment variable is not set or is empty")
+
         print("CREDENTIALS ARE")
         print(credentials)
         self.credentials = self.load_credentials(credentials)
@@ -113,9 +117,23 @@ class Analyzer:
             "Emailing",
         ]
 
+    # def load_credentials(self, credentials):
+    #     credentials = json.loads(credentials)
+    #     return service_account.Credentials.from_service_account_info(info=credentials)
+    
     def load_credentials(self, credentials):
-        credentials = json.loads(credentials)
-        return service_account.Credentials.from_service_account_info(info=credentials)
+        print("Credentials retrieved from environment variable:")
+        print(credentials)  # Print the credentials to ensure they are correct
+        print("Type of credentials variable:", type(credentials))  # Print the type to verify
+
+        try:
+            credentials_json = json.loads(credentials)
+            print("Parsed JSON credentials:")
+            print(credentials_json)
+            return service_account.Credentials.from_service_account_info(info=credentials_json)
+        except json.JSONDecodeError as e:
+            raise ValueError("Invalid JSON for GOOGLE_APPLICATION_CREDENTIALS environment variable") from e
+
 
     def max_mindful_slow(self, data):
         mindful_whitelist = ["Sleep", "Concentration", "Under Influence"]
