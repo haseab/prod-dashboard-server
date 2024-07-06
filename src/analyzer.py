@@ -15,6 +15,8 @@ class Analyzer:
     def __init__(self):
         load_dotenv()
         credentials = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+        print("CREDENTIALS ARE")
+        print(credentials)
         self.credentials = self.load_credentials(credentials)
 
         self.unplanned = GoogleCalendar(
