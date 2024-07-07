@@ -14,12 +14,52 @@ import json
 class Analyzer:
     def __init__(self):
         load_dotenv()
-        credentials = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-        print("Credentials String After Initialization:")
-        print(credentials)
+        # credentials = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+        google_app_type=os.getenv("GOOGLE_APP_TYPE")
+        google_app_project_id=os.getenv("GOOGLE_APP_PROJECT_ID")
+        google_app_private_key_id=os.getenv("GOOGLE_APP_PRIVATE_KEY_ID")
+        google_app_private_key=os.getenv("GOOGLE_APP_PRIVATE_KEY")
+        google_app_client_email=os.getenv("GOOGLE_APP_CLIENT_EMAIL")
+        google_app_client_id=os.getenv("GOOGLE_APP_CLIENT_ID")
+        google_app_auth_uri=os.getenv("GOOGLE_APP_AUTH_URI")
+        google_app_token_uri=os.getenv("GOOGLE_APP_TOKEN_URI")
+        google_app_auth_provider_x509_cert_url=os.getenv("GOOGLE_APP_AUTH_PROVIDER_X509_CERT_URL")
+        google_app_client_x509_cert_url=os.getenv("GOOGLE_APP_CLIENT_X509_CERT_URL")
+        google_app_universe_domain=os.getenv("GOOGLE_APP_UNIVERSE_DOMAIN")
 
-        if not credentials:
-            raise ValueError("GOOGLE_APPLICATION_CREDENTIALS environment variable is not set or is empty")
+        # if any of the above variables are None, raise an error
+        if None in [google_app_type, google_app_project_id, google_app_private_key_id, google_app_private_key, google_app_client_email, google_app_client_id, google_app_auth_uri, google_app_token_uri, google_app_auth_provider_x509_cert_url, google_app_client_x509_cert_url, google_app_universe_domain]:
+            # print all the variables that are None
+            print("One or more of the required environment variables are not set")
+            print("google_app_type: ", google_app_type)
+            print("google_app_project_id: ", google_app_project_id)
+            print("google_app_private_key_id: ", google_app_private_key_id)
+            print("google_app_private_key: ", google_app_private_key)
+            print("google_app_client_email: ", google_app_client_email)
+            print("google_app_client_id: ", google_app_client_id)
+            print("google_app_auth_uri: ", google_app_auth_uri)
+            print("google_app_token_uri: ", google_app_token_uri)
+            print("google_app_auth_provider_x509_cert_url: ", google_app_auth_provider_x509_cert_url)
+            print("google_app_client_x509_cert_url: ", google_app_client_x509_cert_url)
+            print("google_app_universe_domain: ", google_app_universe_domain)
+            raise ValueError("One or more of the required environment variables are not set")
+
+        credentials = {
+            "type": google_app_type,
+            "project_id": google_app_project_id,
+            "private_key_id": google_app_private_key_id,
+            "private_key": google_app_private_key,
+            "client_email": google_app_client_email,
+            "client_id": google_app_client_id,
+            "auth_uri": google_app_auth_uri,
+            "token_uri": google_app_token_uri,
+            "auth_provider_x509_cert_url": google_app_auth_provider_x509_cert_url,
+            "client_x509_cert_url": google_app_client_x509_cert_url,
+            "universe_domain": google_app_universe_domain
+        }
+
+        print("THE OFFICIAL JSON CREDENTIALS ARE: ")
+        print(credentials)
 
         self.credentials = self.load_credentials(credentials)
 
@@ -118,15 +158,9 @@ class Analyzer:
         ]
     
     def load_credentials(self, credentials):
-        try:
-            print("Credentials String Before JSON:")
-            print(credentials)
-            credentials_json = json.loads(credentials)
-            print("Credentials JSON:")
-            print(credentials_json)
-            return service_account.Credentials.from_service_account_info(info=credentials_json)
-        except json.JSONDecodeError as e:
-            raise ValueError("Invalid JSON for GOOGLE_APPLICATION_CREDENTIALS environment variable") from e
+        print("TYPE OF CREDENTIALS")
+        print(type(credentials))
+        return service_account.Credentials.from_service_account_info(info=credentials)
 
 
     def max_mindful_slow(self, data):
