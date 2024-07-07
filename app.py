@@ -33,8 +33,6 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 
 print("Creating engine and initializing database")
 engine = create_engine(DATABASE_URL)
-Session = sessionmaker(bind=engine)
-session = Session()
 
 @app.route("/")
 def hello_world():
@@ -48,6 +46,9 @@ def metrics():
     ## Getting Toggl & Calendar Data
     l = DataLoader()
     a = Analyzer()
+
+    Session = sessionmaker(bind=engine)
+    session = Session()
 
     personal = request.args.get("personal")
 
@@ -133,6 +134,8 @@ def metrics():
     ).order_by(
         func.date(KeyboardShortcut.time)
     ).all()
+
+    session.close()
 
     distraction_counts = {str(count[0]): math.ceil(count[1] / 2) for count in daily_counts}
 
