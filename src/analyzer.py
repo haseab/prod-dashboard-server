@@ -15,7 +15,7 @@ class Analyzer:
     def __init__(self):
         load_dotenv()
         credentials = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-        print("Credentials String:")
+        print("Credentials String After Initialization:")
         print(credentials)
 
         if not credentials:
@@ -116,13 +116,11 @@ class Analyzer:
             "Formal Working",
             "Emailing",
         ]
-
-    # def load_credentials(self, credentials):
-    #     credentials = json.loads(credentials)
-    #     return service_account.Credentials.from_service_account_info(info=credentials)
     
     def load_credentials(self, credentials):
         try:
+            print("Credentials String Before JSON:")
+            print(credentials)
             credentials_json = json.loads(credentials)
             print("Credentials JSON:")
             print(credentials_json)
