@@ -15,6 +15,8 @@ class Analyzer:
     def __init__(self):
         load_dotenv()
         credentials = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+        print("Credentials String:")
+        print(credentials)
 
         if not credentials:
             raise ValueError("GOOGLE_APPLICATION_CREDENTIALS environment variable is not set or is empty")
