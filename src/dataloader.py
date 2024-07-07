@@ -60,20 +60,11 @@ class DataLoader:
             auth=(self.TOGGL_API_KEY, "api_token"),
         ).json()
 
-        print("PRINTING DATA")
-        print(data[0])
-        print("LENGTH OF DATA", len(data))
 
         tag_dic = self._get_tag_list(self.TOGGL_WORKSPACE_ID, self.TOGGL_API_KEY)
         project_dic = self._get_project_list(
             self.TOGGL_WORKSPACE_ID, self.TOGGL_API_KEY
         )
-
-        print("PRINTING TAG DIC")
-        print(tag_dic)
-
-        print("PRINTING PROJECT DIC")
-        print(project_dic)
 
         # Converting JSON into a list of lists format
         for dic in data:
@@ -92,8 +83,6 @@ class DataLoader:
         ## Capitalize the first letter of every column
         df2.columns = [column[0].upper() + column[1:] for column in df2.columns]
 
-        print("PRINTING DF2")
-        print(df2.head())
         ## Choosing which columns to be used
         df2 = df2[["Id", "Project", "Description", "Start", "End", "Tags"]]
         ## Separating start_date column from start_time column and end_date from end_time

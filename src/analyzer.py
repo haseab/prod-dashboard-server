@@ -19,8 +19,6 @@ class Analyzer:
         if not credentials:
             raise ValueError("GOOGLE_APPLICATION_CREDENTIALS environment variable is not set or is empty")
 
-        print("CREDENTIALS ARE")
-        print(credentials)
         self.credentials = self.load_credentials(credentials)
 
         self.unplanned = GoogleCalendar(
@@ -122,14 +120,8 @@ class Analyzer:
     #     return service_account.Credentials.from_service_account_info(info=credentials)
     
     def load_credentials(self, credentials):
-        print("Credentials retrieved from environment variable:")
-        print(credentials)  # Print the credentials to ensure they are correct
-        print("Type of credentials variable:", type(credentials))  # Print the type to verify
-
         try:
             credentials_json = json.loads(credentials)
-            print("Parsed JSON credentials:")
-            print(credentials_json)
             return service_account.Credentials.from_service_account_info(info=credentials_json)
         except json.JSONDecodeError as e:
             raise ValueError("Invalid JSON for GOOGLE_APPLICATION_CREDENTIALS environment variable") from e

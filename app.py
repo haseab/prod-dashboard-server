@@ -10,6 +10,12 @@ from src.constants import TIME_MAP
 import sys
 import os
 import pytz
+from dotenv import load_dotenv
+from sqlalchemy import create_engine, func
+from sqlalchemy.orm import sessionmaker
+import math
+
+from models import Base, KeyboardShortcut
 
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
@@ -22,6 +28,13 @@ CORS(app)
 
 historical_view = False
 
+load_dotenv()
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+print("Creating engine and initializing database")
+engine = create_engine(DATABASE_URL)
+Session = sessionmaker(bind=engine)
+session = Session()
 
 @app.route("/")
 def hello_world():
@@ -108,18 +121,20 @@ def metrics():
         for date in n1HUT
     }
 
-    # # Getting Distraction Data
-    # df = pd.read_csv(
-    #     "/Users/haseab/Desktop/Desktop/backed-up/backed-scripts/Python/TiBA/src/keyboard_shortcut_launches.csv"
-    # )
-    # df["Time"] = pd.to_datetime(df["Time"], errors="coerce")
-    # df = df[(df["Time"] >= start_datetime) & (df["Time"] <= end_datetime)]
-    # df.set_index("Time", inplace=True)
-    # command_df = df[df["Keyboard Shortcut"] == "Command + `"]
-    # daily_counts = command_df.resample("D").count()
-    # daily_counts.index = daily_counts.index.strftime("%Y-%m-%d")
-    # daily_counts = (daily_counts / 2).astype(int)
-    # daily_counts_dict = daily_counts.to_dict()["Keyboard Shortcut"]
+    # Getting Distraction Data
+    daily_counts = session.query(
+        func.date(KeyboardShortcut.time).label('date'),
+        func.count(KeyboardShortcut.keyboard_shortcut).label('count')
+    ).filter(
+        KeyboardShortcut.keyboard_shortcut == 'Command + `',
+        KeyboardShortcut.time.between(start_datetime, end_datetime)
+    ).group_by(
+        func.date(KeyboardShortcut.time)
+    ).order_by(
+        func.date(KeyboardShortcut.time)
+    ).all()
+
+    distraction_counts = {str(count[0]): math.ceil(count[1] / 2) for count in daily_counts}
 
     return_object = {
         "unplannedTimeList": unplanned_time,
@@ -132,7 +147,7 @@ def metrics():
         "hoursFreeList": hours_free,
         "efficiencyList": efficiency,
         "productiveList": productive,
-        "distractionCountList": [],
+        "distractionCountList": distraction_counts,
         "inefficiencyList": inefficiency,
         "flow": flow,
         "startDate": start_date,
