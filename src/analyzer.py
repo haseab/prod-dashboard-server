@@ -122,6 +122,8 @@ class Analyzer:
     def load_credentials(self, credentials):
         try:
             credentials_json = json.loads(credentials)
+            print("Credentials JSON:")
+            print(credentials_json)
             return service_account.Credentials.from_service_account_info(info=credentials_json)
         except json.JSONDecodeError as e:
             raise ValueError("Invalid JSON for GOOGLE_APPLICATION_CREDENTIALS environment variable") from e
