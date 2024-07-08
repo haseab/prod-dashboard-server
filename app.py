@@ -156,7 +156,7 @@ def metrics():
         "startDate": start_date,
         "endDate": end_date,
         "currentActivity": TIME_MAP[current_activity],
-        "currentActivityStartTime": f"{flow_df.iloc[-1]['Start date']} {flow_df.iloc[-1]['Start time']}"
+        "currentActivityStartTime": pd.Timestamp(f"{flow_df.iloc[-1]['Start date']} {flow_df.iloc[-1]['Start time']}").tz_localize('America/Los_Angeles').isoformat(),
     }
 
     pretty_json = json.dumps(return_object, indent=4)
