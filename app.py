@@ -156,7 +156,7 @@ def metrics():
         "startDate": start_date,
         "endDate": end_date,
         "currentActivity": TIME_MAP[current_activity],
-        "currentActivityStartTime": f"{current_task.iloc[0]['Start date']} {current_task.iloc[0]['Start time']}"
+        "currentActivityStartTime": f"{flow_df.iloc[-1]['Start date']} {flow_df.iloc[-1]['Start time']}"
     }
 
     pretty_json = json.dumps(return_object, indent=4)
