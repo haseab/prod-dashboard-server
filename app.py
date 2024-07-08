@@ -141,8 +141,8 @@ def metrics():
 
     return_object = {
         "unplannedTimeList": unplanned_time,
-        "oneHUTList": oneHUT,
-        "p1HUTList": p1HUT,
+        "totalFlowList": oneHUT,
+        "productiveFlowList": p1HUT,
         "n1HUTList": n1HUT,
         "nw1HUTList": nw1HUT,
         "w1HUTList": w1HUT,

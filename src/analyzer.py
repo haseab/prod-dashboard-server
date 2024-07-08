@@ -58,9 +58,6 @@ class Analyzer:
             "universe_domain": google_app_universe_domain
         }
 
-        print("THE OFFICIAL JSON CREDENTIALS ARE: ")
-        print(credentials)
-
         self.credentials = self.load_credentials(credentials)
 
         self.unplanned = GoogleCalendar(
