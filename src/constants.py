@@ -6,7 +6,7 @@ TIME_MAP = {
     "Podcast": "🎧 Listening to Podcast",
     "Music": "🎧 Listening to Music",
     "Sports": "🏀 Playing a Sport",
-    "Playing": "🎮 Playing a Game",
+    "Playing": "🎮 Playing",
     "People": "👱‍♂️ with People",
     "Exploring": "🚶‍♂️ Exploring Somewhere",
     "Chilling": "👱‍♂️ with People",
