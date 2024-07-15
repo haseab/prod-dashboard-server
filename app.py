@@ -10,12 +10,6 @@ from src.constants import TIME_MAP
 import sys
 import os
 import pytz
-from dotenv import load_dotenv
-from sqlalchemy import create_engine, func
-from sqlalchemy.orm import sessionmaker
-import math
-
-from models import Base, KeyboardShortcut
 
 
 sys.path.append(os.path.dirname(os.path.realpath(__file__)))
@@ -27,12 +21,6 @@ app = Flask(__name__)
 CORS(app)
 
 historical_view = False
-
-load_dotenv()
-DATABASE_URL = os.getenv("DATABASE_URL")
-
-print("Creating engine and initializing database")
-engine = create_engine(DATABASE_URL)
 
 @app.route("/")
 def hello_world():
@@ -46,9 +34,6 @@ def metrics():
     ## Getting Toggl & Calendar Data
     l = DataLoader()
     a = Analyzer()
-
-    Session = sessionmaker(bind=engine)
-    session = Session()
 
     personal = request.args.get("personal")
 
@@ -91,6 +76,7 @@ def metrics():
 
     start_datetime = start_datetime.replace(hour=0, minute=0, second=0, microsecond=0)
     end_datetime = end_datetime.replace(hour=23, minute=59, second=59, microsecond=0)
+    
     start_date, end_date = str(start_datetime)[:10], str(end_datetime)[:10]
     time_df = l.fetch_data(start_date, end_date)
     master_df = pd.concat([time_df, now_df]).reset_index(drop=True)
@@ -122,22 +108,7 @@ def metrics():
         for date in n1HUT
     }
 
-    # Getting Distraction Data
-    daily_counts = session.query(
-        func.date(KeyboardShortcut.time).label('date'),
-        func.count(KeyboardShortcut.keyboard_shortcut).label('count')
-    ).filter(
-        KeyboardShortcut.keyboard_shortcut == 'Command + `',
-        KeyboardShortcut.time.between(start_datetime, end_datetime)
-    ).group_by(
-        func.date(KeyboardShortcut.time)
-    ).order_by(
-        func.date(KeyboardShortcut.time)
-    ).all()
-
-    session.close()
-
-    distraction_counts = {str(count[0]): math.ceil(count[1] / 2) for count in daily_counts}
+    distraction_counts = a.calculate_distraction_counts(start_date, end_date, week=True)
 
     return_object = {
         "unplannedTimeList": unplanned_time,
