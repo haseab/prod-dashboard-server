@@ -473,7 +473,7 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
     def calculate_distraction_counts(self, start_date, end_date, week=False):
             # Getting Distraction Data
         start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
-        end_datetime = datetime.strptime(end_date, "%Y-%m-%d")
+        end_datetime = datetime.strptime(end_date, "%Y-%m-%d") + timedelta(days=1)
 
         daily_counts = self.session.query(
             func.date(KeyboardShortcut.time).label('date'),
