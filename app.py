@@ -27,6 +27,101 @@ def hello_world():
     return "Hello, World!"
 
 
+@app.route("/metricsdate")
+def metricsdate():
+
+    l = DataLoader()
+    a = Analyzer()
+    start_date = request.args.get("startDate")
+    end_date = request.args.get("endDate")
+
+    print("start date", start_date, "end date", end_date)
+
+    current_task = l.get_toggl_current_task()
+    current_activity = (
+        current_task.iloc[0]["Project"] if not current_task.empty else "No Activity"
+    )
+
+    now_df = pd.DataFrame(
+        columns=[
+            "Id",
+            "Project",
+            "Description",
+            "Start date",
+            "Start time",
+            "End date",
+            "End time",
+            "Tags",
+            "SecDuration",
+        ]
+    )
+    
+    start_datetime = datetime.strptime(start_date, "%Y-%m-%d")
+    end_datetime = datetime.strptime(end_date, "%Y-%m-%d")
+
+    start_datetime = start_datetime.replace(hour=0, minute=0, second=0, microsecond=0)
+    end_datetime = end_datetime.replace(hour=23, minute=59, second=59, microsecond=0)
+    
+    start_date, end_date = str(start_datetime)[:10], str(end_datetime)[:10]
+    time_df = l.fetch_data(start_date, end_date)
+    master_df = pd.concat([time_df, now_df]).reset_index(drop=True)
+    master_df["TagProductive"] = master_df["Tags"].str.contains("Productive")
+    master_df["TagUnavoidable"] = master_df["Tags"].str.contains("Unavoidable")
+    master_df["Carryover"] = master_df["Tags"].str.contains("Carryover")
+    master_df["FlowExempt"] = master_df["Tags"].str.contains("FlowExempt")
+
+    flow_df = a.group_df(master_df)
+    flow = (
+        round(flow_df.iloc[-1]["SecDuration"] / 3600, 3) if not historical_view else 0
+    )
+    master_df = master_df.drop(
+        columns=["TagProductive", "TagUnavoidable", "Carryover", "FlowExempt"], axis=1
+    )
+    unplanned_time = a.calculate_unplanned_time(start_date, end_date, week=True)
+    p1HUT, n1HUT, nw1HUT, w1HUT = a.calculate_1HUT(master_df, week=True).values()
+    hours_free, efficiency, inefficiency, productive, neutral, wasted, non_wasted = (
+        a.efficiency(l, master_df, week=True).values()
+    )
+    oneHUT = {
+        date: round(
+            n1HUT.get(date, 0)
+            + nw1HUT.get(date, 0)
+            + p1HUT.get(date, 0)
+            + w1HUT.get(date, 0),
+            3,
+        )
+        for date in n1HUT
+    }
+
+    distraction_counts = a.calculate_distraction_counts(start_date, end_date, week=True)
+
+    return_object = {
+        "unplannedTimeList": unplanned_time,
+        "totalFlowList": oneHUT,
+        "productiveFlowList": p1HUT,
+        "n1HUTList": n1HUT,
+        "nw1HUTList": nw1HUT,
+        "w1HUTList": w1HUT,
+        "unproductiveList": wasted,
+        "hoursFreeList": hours_free,
+        "efficiencyList": efficiency,
+        "productiveList": productive,
+        "distractionCountList": distraction_counts,
+        "inefficiencyList": inefficiency,
+        "flow": flow,
+        "startDate": start_date,
+        "endDate": end_date,
+        "currentActivity": TIME_MAP[current_activity],
+        "currentActivityStartTime": pd.Timestamp(f"{flow_df.iloc[-1]['Start date']} {flow_df.iloc[-1]['Start time']}").tz_localize('America/Los_Angeles').isoformat(),
+    }
+
+    pretty_json = json.dumps(return_object, indent=4)
+    print(pretty_json)
+    return {"status": 200, "data": return_object}
+
+
+
+
 @app.route("/metrics")
 def metrics():
     # response = jsonify({"message": "Data from Python serveOr"})
