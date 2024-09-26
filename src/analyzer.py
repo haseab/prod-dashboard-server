@@ -9,9 +9,12 @@ from gcsa.google_calendar import GoogleCalendar
 
 from src.helper import Helper as helper
 from dotenv import load_dotenv
-from sqlalchemy import create_engine, func
+from sqlalchemy import all_, create_engine, func
 from sqlalchemy.orm import sessionmaker
 import math
+import asyncio
+from pprint import pprint
+
 
 from models import Base, KeyboardShortcut
 
@@ -70,10 +73,52 @@ class Analyzer:
 
         self.credentials = self.load_credentials(credentials)
 
-        self.unplanned = GoogleCalendar(
-            default_calendar=os.getenv("UNPLANNED_CALENDAR_ID"),
-            credentials=self.credentials,
-        )
+        self.calendars = {
+            "unplanned": GoogleCalendar(
+                default_calendar=os.getenv("UNPLANNED_CALENDAR_ID"),
+                credentials=self.credentials,
+            ),
+            "business": GoogleCalendar(
+                default_calendar=os.getenv("BUSINESS_CALENDAR_ID"),
+                credentials=self.credentials,
+            ),
+            "maintenance": GoogleCalendar(
+                default_calendar=os.getenv("MAINTENANCE_CALENDAR_ID"),
+                credentials=self.credentials,
+            ),
+            "sprints": GoogleCalendar(
+                default_calendar=os.getenv("SPRINTS_CALENDAR_ID"),
+                credentials=self.credentials,
+            ),
+            "habits": GoogleCalendar(
+                default_calendar=os.getenv("HABITS_CALENDAR_ID"),
+                credentials=self.credentials,
+            ),
+            "wycik": GoogleCalendar(
+                default_calendar=os.getenv("WYCIK_CALENDAR_ID"),
+                credentials=self.credentials,
+            ),
+            "projects": GoogleCalendar(
+                default_calendar=os.getenv("PROJECTS_CALENDAR_ID"),
+                credentials=self.credentials,
+            ),
+            "social": GoogleCalendar(
+                default_calendar=os.getenv("SOCIAL_CALENDAR_ID"),
+                credentials=self.credentials,
+            ),
+            "technicalities": GoogleCalendar(
+                default_calendar=os.getenv("TECHNICALITIES_CALENDAR_ID"),
+                credentials=self.credentials,
+            ),
+            "understanding": GoogleCalendar(
+                default_calendar=os.getenv("UNDERSTANDING_CALENDAR_ID"),
+                credentials=self.credentials,
+            ),
+            "fptstudio": GoogleCalendar(
+                default_calendar=os.getenv("FPTSTUDIO_CALENDAR_ID"),
+                credentials=self.credentials,
+            ),
+        }
 
         Session = sessionmaker(bind=engine)
         self.session = Session()
@@ -272,19 +317,64 @@ class Analyzer:
             str(start_date_prev)[:10], str(end_date_prev)[:10], times - 1
         )
 
-    def get_all_current_events(self, cal_dic):
-        date_before = datetime.now().astimezone()
-        date_after = datetime.now().astimezone() + timedelta(minutes=0.5)
-        all_events = []
+    async def get_all_current_events(cal_dic):
+        date_before = datetime.now().astimezone() + timedelta(minutes=0)
+        date_after = datetime.now().astimezone() + timedelta(minutes=1)
+        
+        # This function will work without async/await if `calendar.get_events` is synchronous
+        def get_events_for_calendar(name, calendar):
+            print(name)
+            events = calendar.get_events(date_before, date_after, single_events=True)
+            return list(events)  # Convert generator to list if needed
 
-        for name, calendar in cal_dic.items():
-            events = list(
-                calendar.get_events(date_before, date_after, single_events=True)
-            )
-            if events != []:
-                events += [name]
-                all_events += [events]
+        # Gather events concurrently using asyncio for synchronous methods
+        tasks = [asyncio.to_thread(get_events_for_calendar, name, calendar) for name, calendar in cal_dic.items()]
+        all_events = await asyncio.gather(*tasks)
+        
+        # Return a flat list of event lists
+
         return all_events
+
+    def filter_event(self, event):
+        # Print the __dict__ of the event object to see its attributes
+        # pprint(event.__dict__)
+        
+        recurring_id = getattr(event, 'recurring_event_id', None)
+        color_id = getattr(event, 'color_id', None)
+        
+        # Return True if the event should be included (non-recurring and non-red)
+        return not recurring_id and color_id != "11"
+
+    async def get_all_daterange_events(self, cal_dic):
+        date_before = datetime.now().astimezone() + timedelta(days=0)
+        date_after = datetime.now().astimezone() + timedelta(days=28)
+        
+        # This function will work without async/await if `calendar.get_events` is synchronous
+        def get_events_for_calendar(name, calendar):
+            print(name)
+            events = calendar.get_events(date_before, date_after, single_events=True)
+            return list(events)  # Convert generator to list if needed
+
+        # Gather events concurrently using asyncio for synchronous methods
+        tasks = [asyncio.to_thread(get_events_for_calendar, name, calendar) for name, calendar in cal_dic.items()]
+        all_events = await asyncio.gather(*tasks)
+
+        # Return a flat list of event lists
+
+        flat_non_recurring_non_red_events = [
+            event for event_group in all_events for event in event_group if self.filter_event(event)
+        ]
+
+        return flat_non_recurring_non_red_events
+        
+    def calculate_task_pile(self):
+        # Use asyncio.run() to run the async function
+        all_events = asyncio.run(self.get_all_daterange_events(self.calendars))
+
+        task_pile_hours = round(sum((event.end - event.start for event in all_events), timedelta()).total_seconds() / 3600, 3)
+
+        return task_pile_hours
+
 
     def calculate_unplanned_time(self, start_date, end_date, week=False):
         # Turn start date and end date into datetime objects
@@ -296,7 +386,7 @@ class Analyzer:
         )
 
         # Get all events from unplanned calendar
-        all_events = self.unplanned.get_events(start_date, end_date, single_events=True)
+        all_events = self.calendars['unplanned'].get_events(start_date, end_date, single_events=True)
 
         # Initialize total duration and a dictionary for daily totals
         total_duration = 0

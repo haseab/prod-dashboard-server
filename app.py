@@ -188,6 +188,7 @@ def metrics():
         columns=["TagProductive", "TagUnavoidable", "Carryover", "FlowExempt"], axis=1
     )
     unplanned_time = a.calculate_unplanned_time(start_date, end_date, week=True)
+    task_pile = a.calculate_task_pile()
     p1HUT, n1HUT, nw1HUT, w1HUT = a.calculate_1HUT(master_df, week=True).values()
     hours_free, efficiency, inefficiency, productive, neutral, wasted, non_wasted = (
         a.efficiency(l, master_df, week=True).values()
@@ -219,6 +220,7 @@ def metrics():
         "distractionCountList": distraction_counts,
         "inefficiencyList": inefficiency,
         "flow": flow,
+        "taskPile": task_pile,
         "startDate": start_date,
         "endDate": end_date,
         "currentActivity": TIME_MAP[current_activity],
