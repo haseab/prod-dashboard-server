@@ -223,6 +223,7 @@ def metrics():
         "taskPile": task_pile,
         "startDate": start_date,
         "endDate": end_date,
+        "neutralActivity": current_activity in a.neutral,
         "currentActivity": TIME_MAP[current_activity],
         "currentActivityStartTime": pd.Timestamp(f"{flow_df.iloc[-1]['Start date']} {flow_df.iloc[-1]['Start time']}").tz_localize('America/Los_Angeles').isoformat(),
     }
