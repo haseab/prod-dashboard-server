@@ -102,10 +102,10 @@ class Analyzer:
                 default_calendar=os.getenv("PROJECTS_CALENDAR_ID"),
                 credentials=self.credentials,
             ),
-            "social": GoogleCalendar(
-                default_calendar=os.getenv("SOCIAL_CALENDAR_ID"),
-                credentials=self.credentials,
-            ),
+            # "social": GoogleCalendar(
+            #     default_calendar=os.getenv("SOCIAL_CALENDAR_ID"),
+            #     credentials=self.credentials,
+            # ),
             "technicalities": GoogleCalendar(
                 default_calendar=os.getenv("TECHNICALITIES_CALENDAR_ID"),
                 credentials=self.credentials,
