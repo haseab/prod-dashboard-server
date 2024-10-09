@@ -147,7 +147,7 @@ def metrics():
                 "Id",
                 "Project",
                 "Description",
-                "Start date",
+                "Start date", 
                 "Start time",
                 "End date",
                 "End time",
@@ -225,7 +225,7 @@ def metrics():
         "endDate": end_date,
         "neutralActivity": current_activity in a.neutral,
         "currentActivity": TIME_MAP[current_activity],
-        "currentActivityStartTime": pd.Timestamp(f"{flow_df.iloc[-1]['Start date']} {flow_df.iloc[-1]['Start time']}").isoformat(),
+        "currentActivityStartTime": pd.Timestamp(f"{flow_df.iloc[-1]['Start date']} {flow_df.iloc[-1]['Start time']}").tz_localize('America/Los_Angeles').isoformat(),
     }
 
     pretty_json = json.dumps(return_object, indent=4)
