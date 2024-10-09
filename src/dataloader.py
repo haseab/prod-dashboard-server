@@ -25,7 +25,7 @@ class DataLoader:
         self.TOGGL_WORKSPACE_ID = os.getenv("TOGGL_WORKSPACE_ID")
         self.NOTION_TOKEN_V2 = os.getenv("NOTION_TOKEN_V2")
 
-    def fetch_data(self, start_date=None, end_date=None, tasks_ago=None):
+    def fetch_data(self, start_date=None, end_date=None, tasks_ago=None, timezone="America/New_York"):
         """
         Interacts with Toggl REST API and gets the minute data from the date range given.
         If start and end date are the same, the data for that day will be shown (non-inclusive)
@@ -37,8 +37,8 @@ class DataLoader:
         # Assuming they did not pass in a start and end date
 
         now_utc = datetime.now(pytz.utc)
-        pst = pytz.timezone("America/Los_Angeles")
-        now = now_utc.astimezone(pst)
+        zone = pytz.timezone(timezone)
+        now = now_utc.astimezone(zone)
 
         if start_date == None:
             start_date = str(now)[:10]
@@ -191,7 +191,7 @@ class DataLoader:
 
         return df2
 
-    def get_toggl_current_task(self):
+    def get_toggl_current_task(self, timezone="America/New_York"):
         url = "https://api.track.toggl.com/api/v9/me/time_entries"
         headers = {"content-type": "application/json"}
         api_token = os.getenv("TOGGL_API_KEY")
@@ -218,14 +218,14 @@ class DataLoader:
         df2 = pd.DataFrame([data.values()], columns=columns)
 
         df2["Start"] = pd.to_datetime(df2["Start"], utc=True)
-        df2["Start"] = df2["Start"].dt.tz_convert("US/Pacific").dt.tz_localize(None)
+        df2["Start"] = df2["Start"].dt.tz_convert(timezone).dt.tz_localize(None)
 
         df2 = df2.drop("At", axis=1)
 
         df2["End"] = datetime.utcnow().replace(
             tzinfo=pytz.utc
         )  # Make 'End' timezone aware
-        df2["End"] = df2["End"].dt.tz_convert("US/Pacific").dt.tz_localize(None)
+        df2["End"] = df2["End"].dt.tz_convert(timezone).dt.tz_localize(None)
 
         secDuration = float((df2["End"] - df2["Start"]).dt.total_seconds())
 

@@ -21,6 +21,7 @@ app = Flask(__name__)
 CORS(app)
 
 historical_view = False
+timezone = "America/New_York"
 
 @app.route("/")
 def hello_world():
@@ -63,7 +64,8 @@ def metricsdate():
     end_datetime = end_datetime.replace(hour=23, minute=59, second=59, microsecond=0)
     
     start_date, end_date = str(start_datetime)[:10], str(end_datetime)[:10]
-    time_df = l.fetch_data(start_date, end_date)
+    time_df = l.fetch_data(start_date, end_date, timezone=timezone)
+    
     master_df = pd.concat([time_df, now_df]).reset_index(drop=True)
     master_df["TagProductive"] = master_df["Tags"].str.contains("Productive")
     master_df["TagUnavoidable"] = master_df["Tags"].str.contains("Unavoidable")
@@ -112,7 +114,7 @@ def metricsdate():
         "startDate": start_date,
         "endDate": end_date,
         "currentActivity": TIME_MAP[current_activity],
-        "currentActivityStartTime": pd.Timestamp(f"{flow_df.iloc[-1]['Start date']} {flow_df.iloc[-1]['Start time']}").tz_localize('America/Los_Angeles').isoformat(),
+        "currentActivityStartTime": pd.Timestamp(f"{flow_df.iloc[-1]['Start date']} {flow_df.iloc[-1]['Start time']}").tz_localize(timezone).isoformat(),
     }
 
     pretty_json = json.dumps(return_object, indent=4)
@@ -133,10 +135,10 @@ def metrics():
     personal = request.args.get("personal")
 
     now_utc = datetime.now(pytz.utc)
-    pst = pytz.timezone("America/Los_Angeles")
-    now = now_utc.astimezone(pst)
+    est = pytz.timezone(timezone)
+    now = now_utc.astimezone(est)
 
-    current_task = l.get_toggl_current_task()
+    current_task = l.get_toggl_current_task(timezone=timezone)
     current_activity = (
         current_task.iloc[0]["Project"] if not current_task.empty else "No Activity"
     )
@@ -173,7 +175,7 @@ def metrics():
     end_datetime = end_datetime.replace(hour=23, minute=59, second=59, microsecond=0)
     
     start_date, end_date = str(start_datetime)[:10], str(end_datetime)[:10]
-    time_df = l.fetch_data(start_date, end_date)
+    time_df = l.fetch_data(start_date, end_date, timezone=timezone)
     master_df = pd.concat([time_df, now_df]).reset_index(drop=True)
     master_df["TagProductive"] = master_df["Tags"].str.contains("Productive")
     master_df["TagUnavoidable"] = master_df["Tags"].str.contains("Unavoidable")
@@ -225,7 +227,7 @@ def metrics():
         "endDate": end_date,
         "neutralActivity": current_activity in a.neutral,
         "currentActivity": TIME_MAP[current_activity],
-        "currentActivityStartTime": pd.Timestamp(f"{flow_df.iloc[-1]['Start date']} {flow_df.iloc[-1]['Start time']}").tz_localize('America/Los_Angeles').isoformat(),
+        "currentActivityStartTime": pd.Timestamp(f"{flow_df.iloc[-1]['Start date']} {flow_df.iloc[-1]['Start time']}").tz_localize(timezone).isoformat(),
     }
 
     pretty_json = json.dumps(return_object, indent=4)
