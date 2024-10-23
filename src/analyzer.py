@@ -451,6 +451,45 @@ actual slow (hours)    : {round(actual_slow_hours, 3)}
         if self.debug:
             print(*args)
 
+    def simple_group_df(self, time_df):
+        # Create a DataFrame
+        df = pd.DataFrame(
+            time_df,
+            columns=[
+                "Id",
+                "Start date",
+                "Start time",
+                "Project",
+                "Description",
+                "SecDuration",
+            ],
+        )
+
+        # Create a new column 'ProjectShifted' to detect consecutive projects
+        df["ProjectShifted"] = df["Project"].shift()
+
+        # Create a 'Group' column to assign a unique group ID for consecutive projects
+        df["Group"] = (df["Project"] != df["ProjectShifted"]).cumsum()
+
+        # Group by the 'Group' column and aggregate the 'SecDuration' using sum()
+        # Also, take the first value of 'Project', 'Start date', 'Start time', and 'Description' for each group
+        grouped = df.groupby("Group").agg(
+            {
+                "Start date": "first",
+                "Start time": "first",
+                "Project": "first",
+                "Description": "first",
+                "SecDuration": "sum",
+            }
+        )
+
+        # Reset the index to flatten the grouped data
+        grouped.reset_index(drop=True, inplace=True)
+
+        # Return the grouped DataFrame
+        return grouped
+
+
     def group_df(self, time_df):
         # Create a DataFrame
         df = pd.DataFrame(

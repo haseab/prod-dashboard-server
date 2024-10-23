@@ -182,6 +182,7 @@ def metrics():
     master_df["Carryover"] = master_df["Tags"].str.contains("Carryover")
     master_df["FlowExempt"] = master_df["Tags"].str.contains("FlowExempt")
 
+    real_df = a.simple_group_df(master_df)
     flow_df = a.group_df(master_df)
     flow = (
         round(flow_df.iloc[-1]["SecDuration"] / 3600, 3) if not historical_view else 0
@@ -227,7 +228,7 @@ def metrics():
         "endDate": end_date,
         "neutralActivity": current_activity in a.neutral,
         "currentActivity": TIME_MAP[current_activity],
-        "currentActivityStartTime": pd.Timestamp(f"{master_df.iloc[-1]['Start date']} {master_df.iloc[-1]['Start time']}").tz_localize(timezone).isoformat(),
+        "currentActivityStartTime": pd.Timestamp(f"{real_df.iloc[-1]['Start date']} {real_df.iloc[-1]['Start time']}").tz_localize(timezone).isoformat(),
     }
 
     pretty_json = json.dumps(return_object, indent=4)
